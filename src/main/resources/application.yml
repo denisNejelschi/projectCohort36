@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: clubActiv
+  datasource:
+    url: jdbc:postgresql://localhost:5432/activeDB
+    username: postgres
+    password: qwerty007
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+  jpa:
+    properties:
+      hibernate:
+        auto_quote_keyword: true
