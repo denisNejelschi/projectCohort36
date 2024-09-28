@@ -4,9 +4,16 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-  <include file="v.0.1.0/changelog.xml" relativeToChangelogFile="true"/>
-  <include file="v.0.2.0/changelog.xml" relativeToChangelogFile="true"/>
-  <include file="v.0.3.0/changelog.xml" relativeToChangelogFile="true"/>
-  <include file="v.0.4.0/changelog.xml" relativeToChangelogFile="true"/>
+  <changeSet id="add-roles" author="Boris">
+
+    <insert tableName="roles">
+      <column name="role" value="ROLE_ADMIN"/>
+    </insert>
+
+    <insert tableName="roles">
+      <column name="role" value="ROLE_USER"/>
+    </insert>
+
+  </changeSet>
 
 </databaseChangeLog>
