@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+  <changeSet id="create-foreign-keys-user-activities" author="Boris">
+
+    <addForeignKeyConstraint
+      baseTableName="user-activities"
+      baseColumnNames="user_id"
+      constraintName="fk_user_activity_to user"
+      referencedTableName="users"
+      referencedColumnNames="id"/>
+
+    <addForeignKeyConstraint
+      baseTableName="user-activities"
+      baseColumnNames="activity_id"
+      constraintName="fk_user_activity_to_activity"
+      referencedTableName="activities"
+      referencedColumnNames="id"/>
+
+  </changeSet>
+
+</databaseChangeLog>
