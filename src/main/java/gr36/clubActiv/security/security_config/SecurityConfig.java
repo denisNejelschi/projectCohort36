@@ -2,6 +2,7 @@ package gr36.clubActiv.security.security_config;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import gr36.clubActiv.security.sec_filter.TokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+
+  // field - наш собственный фильтр
+  private TokenFilter filter;
+
+  // constructor
+  public SecurityConfig(TokenFilter filter) {
+    this.filter = filter;
+  }
 
   @Bean
   public BCryptPasswordEncoder encoder(){

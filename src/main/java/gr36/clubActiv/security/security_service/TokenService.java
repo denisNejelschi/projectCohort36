@@ -18,12 +18,10 @@ import java.util.Set;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
-/**
- * 28/09/2024 clubActiv
- *
- * @author Boris Iurciuc (cohort36)
- */
+
+@Service  // Аннотация, указывающая, что этот класс является сервисом в Spring, который можно инжектировать
 public class TokenService {
   //fields
   private SecretKey accessKey;

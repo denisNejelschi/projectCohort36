@@ -9,12 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
 /**
  * 28/09/2024 clubActiv
  *
  * @author Boris Iurciuc (cohort36)
  */
+@Service
 public class AuthService {
   // fields
   private UserService userService;

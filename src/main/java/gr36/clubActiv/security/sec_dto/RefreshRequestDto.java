@@ -3,7 +3,6 @@ package gr36.clubActiv.security.sec_dto;
 import java.util.Objects;
 
 public class RefreshRequestDto {
-
   //field
   private String refreshToken;
 

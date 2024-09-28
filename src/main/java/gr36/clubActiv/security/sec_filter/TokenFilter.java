@@ -1,4 +1,4 @@
-package gr36.clubActiv.security.security_filter;
+package gr36.clubActiv.security.sec_filter;
 
 
 import gr36.clubActiv.security.AuthInfo;
