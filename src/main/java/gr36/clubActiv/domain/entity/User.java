@@ -120,13 +120,15 @@ public class User implements UserDetails {
   public int hashCode() {
     return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage(), getRoles());
   }
-
   @Override
   public String toString() {
-    return String.format("User: id - %d, username - %s, roles - %s", id, username, roles == null ? "empty" : roles);
+    return String.format("User: id - %d, username - %s, roles - %s",
+        id, username, roles == null ? "empty" : roles);
   }
 
-  //     Метод для получения зашифрованного пароля
+
+
+//     Метод для получения зашифрованного пароля
 //     для добавления пользователей в БД вручную
 //  public static void main(String[] args) {
 //    System.out.println(new BCryptPasswordEncoder().encode("111"));

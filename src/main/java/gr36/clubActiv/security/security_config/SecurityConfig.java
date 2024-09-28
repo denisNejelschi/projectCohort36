@@ -30,14 +30,20 @@ public class SecurityConfig {
     return http
         .csrf(AbstractHttpConfigurer :: disable)
         .sessionManagement(x -> x
-            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-        .httpBasic(Customizer.withDefaults())
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // отключили сессии
+        .httpBasic(AbstractHttpConfigurer::disable) // отключили базовую авторизацию
+        .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // добавили свой фильтр
         .authorizeHttpRequests(x -> x
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/refresh").permitAll() // разрешаем всем доступ к этим endpoints
         ).build();
   }
 }
+
+//        .sessionManagement(x -> x
+//    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+//    .httpBasic(Customizer.withDefaults())
