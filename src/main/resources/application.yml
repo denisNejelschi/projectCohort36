@@ -13,6 +13,22 @@ spring:
       hibernate:
         auto_quote_keyword: true
 
+  mail:
+    username: boris.iurciuc@gmail.com
+    password: ilgxqzrggzpwzvwr
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail:
+        debug: true
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            protocols: TLSv1.2
+            trust: smtp.gmail.com
+
 key:
   access: rq2fK1dVk9TNRg3aQPhEWSVFESp+DEmoY0KdSn6hYGY=
   refresh: u1DiTkT2eOnqMhLwIoNAQ9aoCsmJqFk1HVRM9r8Tcfs=
