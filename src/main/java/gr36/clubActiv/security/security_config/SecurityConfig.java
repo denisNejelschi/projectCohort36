@@ -50,6 +50,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasRole("ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasRole("ADMIN")
             .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/refresh").permitAll() // разрешаем всем доступ к этим endpoints
+            .requestMatchers(HttpMethod.POST, "/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/register").permitAll()
         ).build();
   }
 }

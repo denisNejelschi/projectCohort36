@@ -47,6 +47,9 @@ public class User implements UserDetails {
   )
   private Set<Role> roles;
 
+  @Column(name = "active")
+  private boolean active;
+
   public Set<Role> getRoles() {
     return roles;
   }
@@ -66,6 +69,13 @@ public class User implements UserDetails {
   @Override
   public String getUsername() {
     return username;
+  }
+  public String getName() {
+    return username;
+  }
+
+  public void setName(String username) {
+    this.username = username;
   }
 
   public void setUsername(String username) {
@@ -97,6 +107,14 @@ public class User implements UserDetails {
     this.image = image;
   }
 
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return roles;
@@ -110,16 +128,19 @@ public class User implements UserDetails {
     if (!(o instanceof User user)) {
       return false;
     }
-    return Objects.equals(getId(), user.getId()) && Objects.equals(getUsername(),
-        user.getUsername()) && Objects.equals(getEmail(), user.getEmail())
-        && Objects.equals(getPassword(), user.getPassword()) && Objects.equals(
-        getImage(), user.getImage()) && Objects.equals(getRoles(), user.getRoles());
+    return active == user.active && Objects.equals(getId(), user.getId())
+        && Objects.equals(getUsername(), user.getUsername()) && Objects.equals(
+        getEmail(), user.getEmail()) && Objects.equals(getPassword(), user.getPassword())
+        && Objects.equals(getImage(), user.getImage()) && Objects.equals(
+        getRoles(), user.getRoles());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage(), getRoles());
+    return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage(), getRoles(),
+        active);
   }
+
   @Override
   public String toString() {
     return String.format("User: id - %d, username - %s, roles - %s",
