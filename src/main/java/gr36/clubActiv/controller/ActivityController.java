@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -99,4 +100,17 @@ public class ActivityController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete activity");
     }
   }
+
+  @PostMapping("/{activity_id}/add-user/{user_id}")
+  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
+    ActivityDto updatedActivity = service.addUserToActivity(activity_id, user_id);
+    return ResponseEntity.ok(updatedActivity); // Возвращаем обновленную активность
+  }
+
+  @GetMapping("/user/{userId}/activities")
+  public List<ActivityDto> getActivitiesByUserId(@PathVariable Long userId) {
+    log.info("Fetching activities for user ID: {}", userId); // Логирование
+    return service.getActivitiesByUserId(userId);
+  }
 }
+

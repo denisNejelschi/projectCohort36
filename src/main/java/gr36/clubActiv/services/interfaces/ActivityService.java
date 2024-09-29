@@ -15,6 +15,9 @@ public interface ActivityService {
 
   void deleteActivity(Long id);
 
+  ActivityDto addUserToActivity(Long activity_id, Long user_id);
+
+  List<ActivityDto> getActivitiesByUserId(Long user_id);
 //  List<ActivityDto> getActivitiesByUserId(Long user_id);
 //  ActivityDto addUserToActivity(Long activity_id, Long user_id);
 

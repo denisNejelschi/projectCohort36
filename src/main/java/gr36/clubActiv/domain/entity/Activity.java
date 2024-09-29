@@ -36,12 +36,13 @@ public class Activity {
   @Column(name = "image")
   private String image;
 
-//  @ManyToMany(fetch = FetchType.EAGER)
-//  @JoinTable(name = "user-activities",
-//      joinColumns = @JoinColumn(name = "activity_id"),
-//      inverseJoinColumns = @JoinColumn(name = "user_id")
-//  )
-//  Set<User> users;
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "user-activities",
+      joinColumns = @JoinColumn(name = "activity_id"),
+      inverseJoinColumns = @JoinColumn(name = "user_id")
+  )
+  Set<User> users;
 
   public Long getId() {
     return id;
@@ -84,14 +85,13 @@ public class Activity {
   }
 
 
-//  public Set<User> getUsers() {
-//    return users;
-//  }
-//
-//  public void setUsers(Set<User> users) {
-//    this.users = users;
-//  }
+  public Set<User> getUsers() {
+    return users;
+  }
 
+  public void setUsers(Set<User> users) {
+    this.users = users;
+  }
 
   @Override
   public boolean equals(Object o) {
