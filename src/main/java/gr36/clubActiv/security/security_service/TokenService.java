@@ -42,7 +42,7 @@ public class TokenService {
 
   public String generateAccessToken(UserDetails user) {
     LocalDateTime currentDate = LocalDateTime.now(); // дата сегодня
-    Instant expirationInstant = currentDate.plusDays(7).atZone(ZoneId.systemDefault()).toInstant(); // дата в будущем на плюс 7 дней от сейчас
+    Instant expirationInstant = currentDate.plusDays(27).atZone(ZoneId.systemDefault()).toInstant(); // дата в будущем на плюс 7 дней от сейчас
     Date expiration = Date.from(expirationInstant); // дата истечения годности токена
     // строим токен
     return Jwts.builder()
