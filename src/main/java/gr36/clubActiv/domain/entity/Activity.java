@@ -36,6 +36,9 @@ public class Activity {
   @Column(name = "image")
   private String image;
 
+  @Column(name = "description")
+  private String description;
+
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
       name = "user-activities",
@@ -84,13 +87,20 @@ public class Activity {
     this.image = image;
   }
 
-
   public Set<User> getUsers() {
     return users;
   }
 
   public void setUsers(Set<User> users) {
     this.users = users;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @Override
@@ -112,7 +122,8 @@ public class Activity {
 
   @Override
   public String toString() {
-    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s,",
-             id, title, address, startDate, image);
+    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s,"
+            + "description - %s",
+             id, title, address, startDate, image, description);
   }
 }
