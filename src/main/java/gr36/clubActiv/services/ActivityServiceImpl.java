@@ -2,7 +2,9 @@ package gr36.clubActiv.services;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
+import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.repository.ActivityRepository;
+import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.mapping.ActivityMappingService;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,10 +17,13 @@ public class ActivityServiceImpl implements ActivityService {
 
   private final ActivityRepository repository;
   private final ActivityMappingService mappingService;
+  private final UserRepository userRepository;
 
-  public ActivityServiceImpl(ActivityRepository repository, ActivityMappingService mappingService) {
+  public ActivityServiceImpl(ActivityRepository repository, ActivityMappingService mappingService,
+      UserRepository userRepository) {
     this.repository = repository;
     this.mappingService = mappingService;
+    this.userRepository = userRepository;
   }
 
   @Override
@@ -64,6 +69,32 @@ public class ActivityServiceImpl implements ActivityService {
     Activity activity = repository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
     repository.delete(activity);
+  }
+
+  @Override
+  public ActivityDto addUserToActivity(Long activity_id, Long user_id) {
+
+    Activity activity = repository.findById(activity_id)
+        .orElseThrow(() -> new RuntimeException("Activity not found"));
+    User user = userRepository.findById(user_id)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+
+    // Проверяем, добавлен ли пользователь
+    if (!activity.getUsers().contains(user)) {
+      activity.getUsers().add(user);
+      repository.save(activity);  // Сохраняем изменения
+    } else {
+         return mappingService.mapEntityToDto(activity);
+    }
+    return mappingService.mapEntityToDto(activity);
+  }
+
+  @Override
+  public List<ActivityDto> getActivitiesByUserId(Long user_id) {
+    List<Activity> activities = repository.findByUsersId(user_id);
+    return activities.stream()
+        .map(mappingService::mapEntityToDto)
+        .toList();
   }
 
   // Uncomment and implement these methods as needed

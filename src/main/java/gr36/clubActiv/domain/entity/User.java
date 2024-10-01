@@ -50,6 +50,14 @@ public class User implements UserDetails {
   @Column(name = "active")
   private boolean active;
 
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "user-activities",
+      joinColumns = @JoinColumn(name = "user_id"),
+      inverseJoinColumns = @JoinColumn(name = "activity_id")
+  )
+  private Set<Activity> activities;
+
   public Set<Role> getRoles() {
     return roles;
   }
