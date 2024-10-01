@@ -64,12 +64,13 @@ public class UserDto {
     }
     return Objects.equals(getId(), userDto.getId()) && Objects.equals(
         getUsername(), userDto.getUsername()) && Objects.equals(getEmail(),
-        userDto.getEmail());
+        userDto.getEmail()) && Objects.equals(getPassword(), userDto.getPassword())
+        && Objects.equals(getImage(), userDto.getImage());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getUsername(), getEmail());
+    return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage());
   }
 
   @Override

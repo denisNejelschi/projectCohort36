@@ -16,6 +16,8 @@ public class ActivityDto {
 
   private String image;
 
+  private String description;
+
   public Long getId() {
     return id;
   }
@@ -56,6 +58,14 @@ public class ActivityDto {
     this.image = image;
   }
 
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -75,7 +85,8 @@ public class ActivityDto {
 
   @Override
   public String toString() {
-    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s",
-        id, title, address, startDate, image);
+    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s, "
+            + "description - %s",
+        id, title, address, startDate, image, description);
   }
 }
