@@ -3,6 +3,7 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityCreationException;
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
 import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
@@ -31,10 +32,15 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   @Transactional
   public ActivityDto create(ActivityDto dto) {
-    Activity entity = mappingService.mapDtoToEntity(dto);
-    repository.save(entity);
-    return mappingService.mapEntityToDto(entity);
+    try {
+      Activity entity = mappingService.mapDtoToEntity(dto);
+      repository.save(entity);
+      return mappingService.mapEntityToDto(entity);
+    } catch (Exception e) {
+      throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
+    }
   }
+
 
   @Override
   public List<ActivityDto> getAllActivities() {
@@ -95,15 +101,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Transactional
   public ActivityDto removeUserFromActivity(Long activity_id, Long user_id) {
-    // Fetch the activity by ID and check if it's null
     Activity activity = repository.findById(activity_id)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid activity_id: " + activity_id));
-
-    // Fetch the user by ID and check if it's null
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
     User user = userRepository.findById(user_id)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid user_id: " + user_id));
+        .orElseThrow(() -> new UserNotFoundException(user_id));
 
-    // Check if the user is part of the activity
     if (activity.getUsers().contains(user)) {
       activity.getUsers().remove(user);  // Remove the user from the activity's user collection
       repository.save(activity);  // Save the updated activity
