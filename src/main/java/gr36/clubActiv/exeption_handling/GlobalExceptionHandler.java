@@ -1,6 +1,8 @@
 package gr36.clubActiv.exeption_handling;
 
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
+import gr36.clubActiv.exeption_handling.exeptions.ConfirmationFailedException;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,27 @@ public class GlobalExceptionHandler {
 
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<Response> handleException(UserNotFoundException e) {
+    log.error("UserNotFoundException occurred: {}", e.getMessage());
+
+    Response response = new Response(
+        e.getMessage(),
+        "Activity not found", // Дополнительное сообщение
+        HttpStatus.NOT_FOUND.value() // Статус 404
+    );
+
+    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+  }
+
+
+  @ExceptionHandler(ConfirmationFailedException.class)
+  public ResponseEntity<Response> handleException(ConfirmationFailedException e) {
+    Response response = new Response(e.getMessage());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
 }
 
 

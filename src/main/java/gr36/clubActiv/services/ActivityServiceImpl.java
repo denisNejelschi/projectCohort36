@@ -4,6 +4,7 @@ import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
@@ -72,9 +73,9 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityDto addUserToActivity(Long activity_id, Long user_id) {
 
     Activity activity = repository.findById(activity_id)
-        .orElseThrow(() -> new RuntimeException("Activity not found"));
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
     User user = userRepository.findById(user_id)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new UserNotFoundException(user_id));
 
     if (!activity.getUsers().contains(user)) {
       activity.addUser(user);

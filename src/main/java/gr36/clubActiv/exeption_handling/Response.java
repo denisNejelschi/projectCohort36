@@ -6,7 +6,7 @@ import java.util.Objects;
 public class Response {
 
   private final String message;
-  private String additionalMessage;
+//  private String additionalMessage;
   private int status;
   private final LocalDateTime timestamp;
 
@@ -19,7 +19,7 @@ public class Response {
   // Конструктор с сообщением, дополнительным сообщением, статусом и временной меткой
   public Response(String message, String additionalMessage, int status) {
     this.message = message;
-    this.additionalMessage = additionalMessage;
+//    this.additionalMessage = additionalMessage;
     this.status = status;
     this.timestamp = LocalDateTime.now(); // Устанавливаем текущее время
   }
@@ -29,9 +29,9 @@ public class Response {
     return message;
   }
 
-  public String getAdditionalMessage() {
-    return additionalMessage;
-  }
+//  public String getAdditionalMessage() {
+//    return additionalMessage;
+//  }
 
   public int getStatus() {
     return status;
@@ -46,17 +46,19 @@ public class Response {
     if (this == o) return true;
     if (!(o instanceof Response response)) return false;
     return Objects.equals(message, response.message) &&
-        Objects.equals(additionalMessage, response.additionalMessage) &&
+//        Objects.equals(additionalMessage, response.additionalMessage) &&
         Objects.equals(status, response.status) &&
         Objects.equals(timestamp, response.timestamp);
   }
 
   @Override
   public String toString() {
-    return String.format("Response: status - %d, message - %s, additionalMessage: %s, timestamp: %s",
+    return String.format("Response: status - %d, message - %s, "
+//            + "additionalMessage: %s, "
+            + "timestamp: %s",
         status,
         message,
-        additionalMessage == null ? "N/A" : additionalMessage,
+//        additionalMessage == null ? "N/A" : additionalMessage,
         timestamp.toString());
   }
 }
