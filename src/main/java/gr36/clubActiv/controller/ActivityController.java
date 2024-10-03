@@ -101,7 +101,7 @@ public class ActivityController {
     }
   }
 
-  @PostMapping("/{activity_id}/add-user/{user_id}")
+  @PostMapping("/{activity_id}/add-user/{user_id}") //TODO POST -> PUT
   public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
     ActivityDto updatedActivity = service.addUserToActivity(activity_id, user_id);
     return ResponseEntity.ok(updatedActivity); // Возвращаем обновленную активность
@@ -112,5 +112,19 @@ public class ActivityController {
     log.info("Fetching activities for user ID: {}", userId); // Логирование
     return service.getActivitiesByUserId(userId);
   }
-}
 
+  @DeleteMapping("/{activity_id}/remove-user/{user_id}")
+  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
+    try {
+      ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, user_id);
+      return ResponseEntity.ok(updatedActivity);
+    } catch (IllegalArgumentException e) {
+      // Handle invalid activity_id or user_id
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    } catch (Exception e) {
+      // Handle other exceptions
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to remove user from activity");
+    }
+  }
+
+}

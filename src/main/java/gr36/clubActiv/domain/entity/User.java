@@ -136,7 +136,7 @@ public class User implements UserDetails {
     if (!(o instanceof User user)) {
       return false;
     }
-    return active == user.active && Objects.equals(getId(), user.getId())
+    return isActive() == user.isActive() && Objects.equals(getId(), user.getId())
         && Objects.equals(getUsername(), user.getUsername()) && Objects.equals(
         getEmail(), user.getEmail()) && Objects.equals(getPassword(), user.getPassword())
         && Objects.equals(getImage(), user.getImage()) && Objects.equals(
@@ -146,7 +146,7 @@ public class User implements UserDetails {
   @Override
   public int hashCode() {
     return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage(), getRoles(),
-        active);
+        isActive());
   }
 
   @Override

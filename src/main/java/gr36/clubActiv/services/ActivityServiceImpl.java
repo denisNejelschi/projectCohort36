@@ -59,8 +59,7 @@ public class ActivityServiceImpl implements ActivityService {
     activity.setAddress(dto.getAddress());
     // Update other fields as needed
 
-    Activity updated = repository.save(activity);
-    return mappingService.mapEntityToDto(updated);
+    return mappingService.mapEntityToDto(activity);
   }
 
   @Override
@@ -72,6 +71,7 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  @Transactional
   public ActivityDto addUserToActivity(Long activity_id, Long user_id) {
 
     Activity activity = repository.findById(activity_id)
@@ -79,13 +79,11 @@ public class ActivityServiceImpl implements ActivityService {
     User user = userRepository.findById(user_id)
         .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // Проверяем, добавлен ли пользователь
     if (!activity.getUsers().contains(user)) {
-      activity.getUsers().add(user);
-      repository.save(activity);  // Сохраняем изменения
-    } else {
-         return mappingService.mapEntityToDto(activity);
+      activity.addUser(user);
     }
+
+
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -97,14 +95,25 @@ public class ActivityServiceImpl implements ActivityService {
         .toList();
   }
 
-  // Uncomment and implement these methods as needed
-  // @Override
-  // public List<ActivityDto> getActivitiesByUserId(Long userId) {
-  //   // Implement logic to fetch activities by user_id
-  // }
+  @Transactional
+  public ActivityDto removeUserFromActivity(Long activity_id, Long user_id) {
+    // Fetch the activity by ID and check if it's null
+    Activity activity = repository.findById(activity_id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid activity_id: " + activity_id));
 
-  // @Override
-  // public ActivityDto addUserToActivity(Long activityId, Long userId) {
-  //   // Implement logic to add a user to an activity
-  // }
+    // Fetch the user by ID and check if it's null
+    User user = userRepository.findById(user_id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid user_id: " + user_id));
+
+    // Check if the user is part of the activity
+    if (activity.getUsers().contains(user)) {
+      activity.getUsers().remove(user);  // Remove the user from the activity's user collection
+      repository.save(activity);  // Save the updated activity
+    } else {
+      throw new RuntimeException("User is not part of this activity.");
+    }
+
+    return mappingService.mapEntityToDto(activity);  // Return the updated activity as a DTO
+  }
+
 }
