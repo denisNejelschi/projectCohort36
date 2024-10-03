@@ -3,6 +3,7 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
@@ -45,7 +46,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public ActivityDto getActivityById(Long id) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -53,12 +54,8 @@ public class ActivityServiceImpl implements ActivityService {
   @Transactional
   public ActivityDto update(Long id, ActivityDto dto) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
-
-    // Update fields as necessary
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     activity.setAddress(dto.getAddress());
-    // Update other fields as needed
-
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -66,7 +63,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Transactional
   public void deleteActivity(Long id) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     repository.delete(activity);
   }
 

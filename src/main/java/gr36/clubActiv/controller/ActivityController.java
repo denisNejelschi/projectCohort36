@@ -56,50 +56,26 @@ public class ActivityController {
 
   @GetMapping("/{id}")
   public ResponseEntity<ActivityDto> getActivityById(@PathVariable Long id) {
-    try {
       log.info("Fetching activity by ID: {}", id);
       ActivityDto activity = service.getActivityById(id);
       return ResponseEntity.ok(activity);
-    } catch (EntityNotFoundException e) {
-      log.error("Activity not found with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    } catch (Exception e) {
-      log.error("Error while fetching activity by ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
   }
 
   @PutMapping("/update/{id}")
   public ResponseEntity<?> update(
       @PathVariable("id") Long id,
       @RequestBody ActivityDto dto) {
-    try {
       log.info("Updating activity with ID: {}", id);
       ActivityDto updatedActivity = service.update(id, dto);
       return ResponseEntity.ok(updatedActivity);
-    } catch (EntityNotFoundException e) {
-      log.error("Activity not found with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Activity not found");
-    } catch (Exception e) {
-      log.error("Error while updating activity with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update activity");
-    }
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
-    try {
       log.info("Deleting activity with ID: {}", id);
       service.deleteActivity(id);
       return ResponseEntity.noContent().build();
-    } catch (EntityNotFoundException e) {
-      log.error("Activity not found with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Activity not found");
-    } catch (Exception e) {
-      log.error("Error while deleting activity with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete activity");
-    }
-  }
+   }
 
   @PostMapping("/{activity_id}/add-user/{user_id}") //TODO POST -> PUT
   public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
