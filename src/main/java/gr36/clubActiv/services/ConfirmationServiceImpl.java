@@ -51,6 +51,14 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     }
 
     return entity.getUser();
+
+  }
+
+
+
+  @Override
+  public void deleteByUserId(Long userId) {
+    repository.deleteByUserId(userId);
   }
 
 

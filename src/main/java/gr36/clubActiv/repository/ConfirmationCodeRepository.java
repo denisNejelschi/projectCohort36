@@ -9,4 +9,6 @@ public interface ConfirmationCodeRepository extends JpaRepository<ConfirmationCo
 
   Optional<ConfirmationCode> findByCode(String code);
 
+
+  void deleteByUserId(Long userId);
 }
