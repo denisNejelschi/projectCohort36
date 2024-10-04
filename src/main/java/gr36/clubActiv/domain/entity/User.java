@@ -78,6 +78,7 @@ public class User implements UserDetails {
   public String getUsername() {
     return username;
   }
+
   public String getName() {
     return username;
   }
@@ -155,11 +156,9 @@ public class User implements UserDetails {
         id, username, roles == null ? "empty" : roles);
   }
 
-
-
-//     Метод для получения зашифрованного пароля
-//     для добавления пользователей в БД вручную
-//  public static void main(String[] args) {
-//    System.out.println(new BCryptPasswordEncoder().encode("111"));
-//  }
+//    Метод для получения зашифрованного пароля
+//    для добавления пользователей в БД вручную
+// public static void main(String[] args) {
+//   System.out.println(new BCryptPasswordEncoder().encode("111"));
+// }
 }

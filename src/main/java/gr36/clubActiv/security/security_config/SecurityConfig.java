@@ -52,9 +52,9 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user/{user_id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/user/{userId}/activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user/{user_id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/refresh").permitAll() // разрешаем всем доступ к этим endpoints
-            .requestMatchers(HttpMethod.POST, "/register").permitAll()
-            .requestMatchers(HttpMethod.GET, "/register").permitAll()
+            .requestMatchers(HttpMethod.POST, "api/auth/login", "api/auth/refresh").permitAll() // разрешаем всем доступ к этим endpoints
+            .requestMatchers(HttpMethod.POST, "api/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "api/register").permitAll()
 //                .anyRequest().permitAll()
         ).build();
   }
