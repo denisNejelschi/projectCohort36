@@ -3,6 +3,9 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityCreationException;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
@@ -29,10 +32,15 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   @Transactional
   public ActivityDto create(ActivityDto dto) {
-    Activity entity = mappingService.mapDtoToEntity(dto);
-    repository.save(entity);
-    return mappingService.mapEntityToDto(entity);
+    try {
+      Activity entity = mappingService.mapDtoToEntity(dto);
+      repository.save(entity);
+      return mappingService.mapEntityToDto(entity);
+    } catch (Exception e) {
+      throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
+    }
   }
+
 
   @Override
   public List<ActivityDto> getAllActivities() {
@@ -45,7 +53,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public ActivityDto getActivityById(Long id) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -53,12 +61,8 @@ public class ActivityServiceImpl implements ActivityService {
   @Transactional
   public ActivityDto update(Long id, ActivityDto dto) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
-
-    // Update fields as necessary
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     activity.setAddress(dto.getAddress());
-    // Update other fields as needed
-
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -66,7 +70,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Transactional
   public void deleteActivity(Long id) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     repository.delete(activity);
   }
 
@@ -75,9 +79,9 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityDto addUserToActivity(Long activity_id, Long user_id) {
 
     Activity activity = repository.findById(activity_id)
-        .orElseThrow(() -> new RuntimeException("Activity not found"));
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
     User user = userRepository.findById(user_id)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new UserNotFoundException(user_id));
 
     if (!activity.getUsers().contains(user)) {
       activity.addUser(user);
@@ -97,15 +101,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Transactional
   public ActivityDto removeUserFromActivity(Long activity_id, Long user_id) {
-    // Fetch the activity by ID and check if it's null
     Activity activity = repository.findById(activity_id)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid activity_id: " + activity_id));
-
-    // Fetch the user by ID and check if it's null
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
     User user = userRepository.findById(user_id)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid user_id: " + user_id));
+        .orElseThrow(() -> new UserNotFoundException(user_id));
 
-    // Check if the user is part of the activity
     if (activity.getUsers().contains(user)) {
       activity.getUsers().remove(user);  // Remove the user from the activity's user collection
       repository.save(activity);  // Save the updated activity
