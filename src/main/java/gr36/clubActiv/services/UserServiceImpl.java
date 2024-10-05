@@ -1,6 +1,7 @@
 package gr36.clubActiv.services;
 
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ConfirmationCodeRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ConfirmationService;
@@ -78,8 +79,11 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Optional<User> findById(Long id) {
-    return userRepository.findById(id);
+  public Optional<User> findById(Long id) {//TODO only admin or user can see this endpoint
+
+    return Optional.ofNullable(userRepository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException(id)));
+
   }
 
   @Override

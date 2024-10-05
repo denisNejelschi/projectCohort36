@@ -53,8 +53,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/activity/user/{userId}/activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user/{user_id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll() // Allow login and refresh for everyone
-            .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll() // Public registration
-            .requestMatchers(HttpMethod.GET, "/api/users/register").permitAll() // Public registration page
+            .requestMatchers(HttpMethod.POST, "/register").permitAll() // Public registration
+            .requestMatchers(HttpMethod.GET, "/register").permitAll() // Public registration page
         ).build();
   }
 }

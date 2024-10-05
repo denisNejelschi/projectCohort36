@@ -27,10 +27,10 @@ public class Activity {
   private Long id;
 
   @Column(name = "title")
-  private  String title;
+  private String title;
 
   @Column(name = "address")
-  private  String address;
+  private String address;
 
   @Column(name = "date-time")
   private LocalDate startDate;
@@ -136,6 +136,6 @@ public class Activity {
   public String toString() {
     return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s,"
             + "description - %s",
-             id, title, address, startDate, image, description);
+        id, title, address, startDate, image, description);
   }
 }
