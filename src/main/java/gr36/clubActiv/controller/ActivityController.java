@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,12 +67,30 @@ public class ActivityController {
       return ResponseEntity.ok(updatedActivity);
   }
 
+//  @DeleteMapping("/{id}")
+//  public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
+//      log.info("Deleting activity with ID: {}", id);
+//      service.deleteActivity(id);
+//      return ResponseEntity.noContent().build();
+//   }
+
   @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
-      log.info("Deleting activity with ID: {}", id);
-      service.deleteActivity(id);
-      return ResponseEntity.noContent().build();
-   }
+    log.info("Attempting to delete activity with ID: {}", id);
+
+    // Проверяем, существует ли активность
+    ActivityDto activity = service.getActivityById(id);
+    if (activity == null) {
+      log.error("Activity with ID {} not found", id);
+      return new ResponseEntity<>("Activity not found", HttpStatus.NOT_FOUND);
+    }
+
+    // Если активность существует, удаляем ее
+    service.deleteActivity(id);
+    log.info("Activity with ID {} deleted successfully", id);
+    return ResponseEntity.noContent().build();
+  }
 
   @PutMapping("/{activity_id}/add-user/{user_id}") //TODO POST -> PUT
   public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
