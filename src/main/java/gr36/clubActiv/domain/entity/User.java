@@ -27,7 +27,7 @@ public class User implements UserDetails {
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "username", unique = true, nullable = false)
+  @Column(name = "username",  nullable = false)
   private String username;
 
   @Column(name = "email", unique = true, nullable = false)
@@ -78,6 +78,7 @@ public class User implements UserDetails {
   public String getUsername() {
     return username;
   }
+
   public String getName() {
     return username;
   }
@@ -136,7 +137,7 @@ public class User implements UserDetails {
     if (!(o instanceof User user)) {
       return false;
     }
-    return active == user.active && Objects.equals(getId(), user.getId())
+    return isActive() == user.isActive() && Objects.equals(getId(), user.getId())
         && Objects.equals(getUsername(), user.getUsername()) && Objects.equals(
         getEmail(), user.getEmail()) && Objects.equals(getPassword(), user.getPassword())
         && Objects.equals(getImage(), user.getImage()) && Objects.equals(
@@ -146,7 +147,7 @@ public class User implements UserDetails {
   @Override
   public int hashCode() {
     return Objects.hash(getId(), getUsername(), getEmail(), getPassword(), getImage(), getRoles(),
-        active);
+        isActive());
   }
 
   @Override
@@ -155,11 +156,9 @@ public class User implements UserDetails {
         id, username, roles == null ? "empty" : roles);
   }
 
-
-
-//     Метод для получения зашифрованного пароля
-//     для добавления пользователей в БД вручную
-//  public static void main(String[] args) {
-//    System.out.println(new BCryptPasswordEncoder().encode("111"));
-//  }
+//    Метод для получения зашифрованного пароля
+//    для добавления пользователей в БД вручную
+// public static void main(String[] args) {
+//   System.out.println(new BCryptPasswordEncoder().encode("111"));
+// }
 }

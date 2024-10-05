@@ -1,5 +1,6 @@
 package gr36.clubActiv.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +13,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,10 +27,10 @@ public class Activity {
   private Long id;
 
   @Column(name = "title")
-  private  String title;
+  private String title;
 
   @Column(name = "address")
-  private  String address;
+  private String address;
 
   @Column(name = "date-time")
   private LocalDate startDate;
@@ -45,7 +47,12 @@ public class Activity {
       joinColumns = @JoinColumn(name = "activity_id"),
       inverseJoinColumns = @JoinColumn(name = "user_id")
   )
-  Set<User> users;
+  @JsonIgnore
+  private List<User> users;
+
+  public void addUser(User user) {
+    users.add(user);
+  }
 
   public Long getId() {
     return id;
@@ -87,11 +94,11 @@ public class Activity {
     this.image = image;
   }
 
-  public Set<User> getUsers() {
+  public List<User> getUsers() {
     return users;
   }
 
-  public void setUsers(Set<User> users) {
+  public void setUsers(List<User> users) {
     this.users = users;
   }
 
@@ -103,6 +110,7 @@ public class Activity {
     this.description = description;
   }
 
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -112,18 +120,22 @@ public class Activity {
       return false;
     }
     return Objects.equals(getId(), activity.getId()) && Objects.equals(getTitle(),
-        activity.getTitle());
+        activity.getTitle()) && Objects.equals(getAddress(), activity.getAddress())
+        && Objects.equals(getStartDate(), activity.getStartDate())
+        && Objects.equals(getImage(), activity.getImage()) && Objects.equals(
+        getDescription(), activity.getDescription());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getTitle());
+    return Objects.hash(getId(), getTitle(), getAddress(), getStartDate(), getImage(),
+        getDescription());
   }
 
   @Override
   public String toString() {
     return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s,"
             + "description - %s",
-             id, title, address, startDate, image, description);
+        id, title, address, startDate, image, description);
   }
 }

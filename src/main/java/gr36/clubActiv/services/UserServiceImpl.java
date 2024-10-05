@@ -1,15 +1,18 @@
 package gr36.clubActiv.services;
 
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
+import gr36.clubActiv.repository.ConfirmationCodeRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ConfirmationService;
 import gr36.clubActiv.services.interfaces.EmailService;
 import gr36.clubActiv.services.interfaces.RoleService;
 import gr36.clubActiv.services.interfaces.UserService;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,17 +25,21 @@ public class UserServiceImpl implements UserService {
   private final EmailService emailService;
   private final BCryptPasswordEncoder encoder;
   private final ConfirmationService confirmationService;
+  private final UserRepository userRepository;
+  private final ConfirmationCodeRepository confirmationCodeRepository;  // Inject ConfirmationCodeRepository
 
   public UserServiceImpl(
       UserRepository repository, RoleService roleService,
       EmailService emailService, BCryptPasswordEncoder encoder,
-      ConfirmationService confirmationService
-  ) {
+      ConfirmationService confirmationService,
+      UserRepository userRepository, ConfirmationCodeRepository confirmationCodeRepository) {
     this.repository = repository;
     this.roleService = roleService;
     this.emailService = emailService;
     this.encoder = encoder;
     this.confirmationService = confirmationService;
+    this.userRepository = userRepository;
+    this.confirmationCodeRepository = confirmationCodeRepository;  // Assign ConfirmationCodeRepository
   }
 
   @Override
@@ -44,24 +51,19 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void register(User user) {
-    String username = user.getUsername();
-    User existedUser = repository.findByUsername(username).orElse(null);
-
-    if (existedUser != null && existedUser.isActive()) {
-      throw new RuntimeException("User already exists");
+    if (userRepository.findByEmail(user.getEmail()) != null) {
+      throw new IllegalArgumentException("Email already registered.");
     }
 
-    if (existedUser == null) {
-      existedUser = new User();
-      existedUser.setUsername(username);
-      existedUser.setRoles(Set.of(roleService.getRoleUser()));
-    }
+    User newUser = new User();
+    newUser.setUsername(user.getUsername());
+    newUser.setRoles(Set.of(roleService.getRoleUser()));
+    newUser.setEmail(user.getEmail());
+    newUser.setPassword(encoder.encode(user.getPassword()));
+    newUser.setActive(false);
 
-    existedUser.setPassword(encoder.encode(user.getPassword()));
-    existedUser.setEmail(user.getEmail());
-
-    repository.save(existedUser);
-    emailService.sendConfirmationEmail(existedUser);
+    repository.save(newUser);
+    emailService.sendConfirmationEmail(newUser);
   }
 
   @Override
@@ -71,10 +73,41 @@ public class UserServiceImpl implements UserService {
     user.setActive(true);
   }
 
+  @Override
+  public List<User> findAll() {
+    return userRepository.findAll();
+  }
+
+  @Override
+  public Optional<User> findById(Long id) {//TODO only admin or user can see this endpoint
+
+    return Optional.ofNullable(userRepository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException(id)));
+
+  }
+
+  @Override
+  public User save(User user) {
+    return userRepository.save(user);
+  }
+
+  @Override
+  @Transactional
+  public void delete(Long id) {
+    confirmationCodeRepository.deleteByUserId(id);
+    repository.deleteById(id);
+  }
+
+  @Override
+  public Optional<User> findByEmail(String email) {
+    return Optional.ofNullable(userRepository.findByEmail(email));
+  }
+}
+
 //  @Override
 //  @Transactional
 //  public void registrationConfirm(String code) {
 //    User user = confirmationService.getUserByConfirmationCode(code);
 //    user.setActive(true);
 //  }
-}
+

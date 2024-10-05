@@ -3,6 +3,9 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityCreationException;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
@@ -29,10 +32,15 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   @Transactional
   public ActivityDto create(ActivityDto dto) {
-    Activity entity = mappingService.mapDtoToEntity(dto);
-    repository.save(entity);
-    return mappingService.mapEntityToDto(entity);
+    try {
+      Activity entity = mappingService.mapDtoToEntity(dto);
+      repository.save(entity);
+      return mappingService.mapEntityToDto(entity);
+    } catch (Exception e) {
+      throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
+    }
   }
+
 
   @Override
   public List<ActivityDto> getAllActivities() {
@@ -45,7 +53,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public ActivityDto getActivityById(Long id) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -53,39 +61,33 @@ public class ActivityServiceImpl implements ActivityService {
   @Transactional
   public ActivityDto update(Long id, ActivityDto dto) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
-
-    // Update fields as necessary
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     activity.setAddress(dto.getAddress());
-    // Update other fields as needed
-
-    Activity updated = repository.save(activity);
-    return mappingService.mapEntityToDto(updated);
+    return mappingService.mapEntityToDto(activity);
   }
 
   @Override
   @Transactional
   public void deleteActivity(Long id) {
     Activity activity = repository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Activity not found with ID: " + id));
+        .orElseThrow(() -> new ActivityNotFoundException(id));
     repository.delete(activity);
   }
 
   @Override
+  @Transactional
   public ActivityDto addUserToActivity(Long activity_id, Long user_id) {
 
     Activity activity = repository.findById(activity_id)
-        .orElseThrow(() -> new RuntimeException("Activity not found"));
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
     User user = userRepository.findById(user_id)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new UserNotFoundException(user_id));
 
-    // Проверяем, добавлен ли пользователь
     if (!activity.getUsers().contains(user)) {
-      activity.getUsers().add(user);
-      repository.save(activity);  // Сохраняем изменения
-    } else {
-         return mappingService.mapEntityToDto(activity);
+      activity.addUser(user);
     }
+
+
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -97,14 +99,21 @@ public class ActivityServiceImpl implements ActivityService {
         .toList();
   }
 
-  // Uncomment and implement these methods as needed
-  // @Override
-  // public List<ActivityDto> getActivitiesByUserId(Long userId) {
-  //   // Implement logic to fetch activities by user_id
-  // }
+  @Transactional
+  public ActivityDto removeUserFromActivity(Long activity_id, Long user_id) {
+    Activity activity = repository.findById(activity_id)
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
+    User user = userRepository.findById(user_id)
+        .orElseThrow(() -> new UserNotFoundException(user_id));
 
-  // @Override
-  // public ActivityDto addUserToActivity(Long activityId, Long userId) {
-  //   // Implement logic to add a user to an activity
-  // }
+    if (activity.getUsers().contains(user)) {
+      activity.getUsers().remove(user);  // Remove the user from the activity's user collection
+      repository.save(activity);  // Save the updated activity
+    } else {
+      throw new RuntimeException("User is not part of this activity.");
+    }
+
+    return mappingService.mapEntityToDto(activity);  // Return the updated activity as a DTO
+  }
+
 }

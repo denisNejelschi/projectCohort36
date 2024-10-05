@@ -9,7 +9,7 @@ public interface ActivityService {
 
   List<ActivityDto> getAllActivities();
 
-  ActivityDto update(Long id, ActivityDto dto);
+  ActivityDto update(Long id, ActivityDto dto); // delete id
 
   ActivityDto getActivityById(Long id);
 
@@ -18,7 +18,7 @@ public interface ActivityService {
   ActivityDto addUserToActivity(Long activity_id, Long user_id);
 
   List<ActivityDto> getActivitiesByUserId(Long user_id);
-//  List<ActivityDto> getActivitiesByUserId(Long user_id);
-//  ActivityDto addUserToActivity(Long activity_id, Long user_id);
+
+  ActivityDto removeUserFromActivity(Long activity_id, Long user_id);
 
 }
