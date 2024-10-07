@@ -22,4 +22,9 @@ public interface UserService extends UserDetailsService {
   void delete(Long id);
 
 
+  boolean isLastAdmin(Long userId);
+
+  boolean existsByUsername(String testUser);
+
+  int countAdmins();
 }

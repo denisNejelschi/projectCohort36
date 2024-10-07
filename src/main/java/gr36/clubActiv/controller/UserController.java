@@ -3,12 +3,9 @@ package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.services.interfaces.UserService;
-import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,10 +56,17 @@ public class UserController {
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
     return userService.findById(id)
         .map(user -> {
+
+          if (userService.isLastAdmin(id)) {
+
+            return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+          }
           userService.delete(id);
           return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
+
+
 }
 
 
