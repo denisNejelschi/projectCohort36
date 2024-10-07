@@ -39,6 +39,7 @@ public class ActivityServiceImpl implements ActivityService {
     } catch (Exception e) {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }
+
   }
 
 
