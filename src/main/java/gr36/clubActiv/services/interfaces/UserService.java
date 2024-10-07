@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
 
-  //UserDetailsService loadUserByUsername(String username) throws UsernameNotFoundException;
+
   void register(User user);
 
   void registrationConfirm(String code);
@@ -21,5 +21,12 @@ public interface UserService extends UserDetailsService {
 
   void delete(Long id);
 
-  Optional<User> findByEmail(String email);
+
+  boolean isLastAdmin(Long userId);
+
+  boolean existsByUsername(String testUser);
+
+  int countAdmins();
+
+  User findByUsername(String username);
 }

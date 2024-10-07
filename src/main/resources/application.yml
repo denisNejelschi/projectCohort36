@@ -14,8 +14,8 @@ spring:
         auto_quote_keyword: true
 
   mail:
-    username: boris.iurciuc@gmail.com
-    password: ilgxqzrggzpwzvwr
+    username: nejelschi@gmail.com
+    password: ppcwgqzjqenwekxh
     host: smtp.gmail.com
     port: 587
     properties:

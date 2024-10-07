@@ -44,8 +44,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET,"/api/users").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET,"/api/users/{id}").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE,"/api/users/{id}").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET,"/api/users/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE,"/api/users/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.PUT,"/api/users/{id}").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
@@ -55,6 +55,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll() // Allow login and refresh for everyone
             .requestMatchers(HttpMethod.POST, "/register").permitAll() // Public registration
             .requestMatchers(HttpMethod.GET, "/register").permitAll() // Public registration page
+            .requestMatchers(HttpMethod.GET,"/api/auth/me" ).permitAll()//TODO ask Menthor!
         ).build();
   }
 }

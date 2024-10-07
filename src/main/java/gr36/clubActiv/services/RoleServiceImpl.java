@@ -9,10 +9,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-  public final RoleRepository repository;
+  private final RoleRepository repository;
 
   public RoleServiceImpl(RoleRepository repository) {
     this.repository = repository;
+  }
+
+  @Override
+  public Role getRoleAdmin() {
+    return repository.findByRole("ROLE_ADMIN").orElseThrow(
+        () -> new RuntimeException("Database doesn't contain ROLE_ADMIN")
+    );
   }
 
   @Override
@@ -22,3 +29,5 @@ public class RoleServiceImpl implements RoleService {
     );
   }
 }
+
+

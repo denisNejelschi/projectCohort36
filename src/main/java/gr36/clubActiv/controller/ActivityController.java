@@ -76,7 +76,7 @@ public class ActivityController {
 //      return ResponseEntity.noContent().build();
 //   }
 
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/{id}")// TODO creator and admin can delete only
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
     log.info("Attempting to delete activity with ID: {}", id);
