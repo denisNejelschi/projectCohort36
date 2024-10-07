@@ -55,6 +55,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll() // Allow login and refresh for everyone
             .requestMatchers(HttpMethod.POST, "/register").permitAll() // Public registration
             .requestMatchers(HttpMethod.GET, "/register").permitAll() // Public registration page
+            .requestMatchers(HttpMethod.GET,"/api/auth/me" ).permitAll()//TODO ask Menthor!
         ).build();
   }
 }

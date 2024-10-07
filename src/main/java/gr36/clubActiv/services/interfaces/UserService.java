@@ -27,4 +27,6 @@ public interface UserService extends UserDetailsService {
   boolean existsByUsername(String testUser);
 
   int countAdmins();
+
+  User findByUsername(String username);
 }

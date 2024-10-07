@@ -34,6 +34,8 @@ public class UserServiceImpl implements UserService {
   private final ConfirmationCodeRepository confirmationCodeRepository;
   private final UserRepository userRepository;
 
+
+
   public UserServiceImpl(UserRepository repository, RoleService roleService,
       EmailService emailService, BCryptPasswordEncoder encoder,
       ConfirmationService confirmationService,
@@ -131,6 +133,10 @@ public class UserServiceImpl implements UserService {
     return userRepository.countByRolesContaining(adminRole);
   }
 
+  @Override
+  public User findByUsername(String username) {
+    return userRepository.findByUsername(username).orElse(null);
+  }
 
 
 }
