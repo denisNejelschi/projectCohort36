@@ -14,47 +14,57 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-  private AuthService service;
-  private UserService userService;
+  private final AuthService authService;
+  private final UserService userService;
 
-  public AuthController(AuthService service, UserService userService) {
-    this.service = service;
+  public AuthController(AuthService authService, UserService userService) {
+    this.authService = authService;
     this.userService = userService;
   }
 
-  //endpoint для аутентификации пользователя
+  // Endpoint for user login
   @PostMapping("/login")
-  public TokenResponseDto login(@RequestBody User user) throws AuthException {
+  public ResponseEntity<TokenResponseDto> login(@RequestBody User user) throws AuthException {
     try {
-      return service.login(user);
+      TokenResponseDto tokenResponse = authService.login(user);
+      return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Authentication failed", e);
     }
   }
 
+  // Endpoint for refreshing the access token
   @PostMapping("/refresh")
-  public TokenResponseDto getNewAccessToken(@RequestBody RefreshRequestDto request) {
+  public ResponseEntity<TokenResponseDto> getNewAccessToken(
+      @RequestBody RefreshRequestDto request) {
     try {
-      return service.getNewAccessToken(request.getRefreshToken());
+      TokenResponseDto tokenResponse = authService.getNewAccessToken(request.getRefreshToken());
+      return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to refresh token", e);
     }
   }
-  @GetMapping("/me")
-  public ResponseEntity<?> getCurrentUser(Authentication authentication) {
 
+  // Endpoint to get current authenticated user information
+  @GetMapping("/me")
+  public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication) {
     String username = authentication.getName();
 
+    try {
 
-    User currentUser = userService.findByUsername(username);
+      User currentUser = userService.findByUsername(username)
+          .orElseThrow(() -> new RuntimeException("User not found"));
 
+      return ResponseEntity.ok(new UserResponseDto(currentUser));
+    } catch (RuntimeException e) {
 
-
-    return ResponseEntity.ok(new UserResponseDto(currentUser));
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
   }
 }

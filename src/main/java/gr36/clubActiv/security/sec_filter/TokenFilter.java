@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -30,23 +31,39 @@ public class TokenFilter extends GenericFilterBean {
   // фильтр
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-    String token = getTokenFromRequest((HttpServletRequest) servletRequest); // можем сделать безопасный кастинг так как servletRequest расширяет HttpServletRequest
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    String token = getTokenFromRequest(request);
 
-    if(token != null && service.validateAccessToken(token)){
-      Claims claims = service.getAccessClaims(token);
-      AuthInfo authInfo = service.mapClaimsToAuthInfo(claims);
-      authInfo.setAuthenticated(true);
-      SecurityContextHolder.getContext().setAuthentication(authInfo);
+    if (token != null) {
+      try {
+        if (service.validateAccessToken(token)) {
+          Claims claims = service.getAccessClaims(token);
+          AuthInfo authInfo = service.mapClaimsToAuthInfo(claims);
+          authInfo.setAuthenticated(true);
+          SecurityContextHolder.getContext().setAuthentication(authInfo);
+        } else {
+          logger.warn("Invalid JWT token");
+          ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
+          return;
+        }
+      } catch (Exception e) {
+        logger.error("JWT validation error: " + e.getMessage());
+        ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT Token validation error");
+        return;
+      }
     }
-    filterChain.doFilter(servletRequest, servletResponse); // отправляем запрос дальше по цепочке фильтров
+
+
+    filterChain.doFilter(servletRequest, servletResponse);
   }
+
 
   private String getTokenFromRequest(HttpServletRequest request){
     // заголовок Authorization -> Bearer 2k3424bmn234bm2b34mb2m3b2m2b34
     String token = request.getHeader("Authorization");
 
     if(token != null && token.startsWith("Bearer ")){
-      return token.substring(7); // отбросили Bearer
+      return token.substring(7);
     }
     return null;
   }
