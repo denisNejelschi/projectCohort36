@@ -68,6 +68,9 @@ public class UserServiceImpl implements UserService {
     newUser.setRoles(Set.of(roleService.getRoleUser()));
     newUser.setEmail(user.getEmail());
     newUser.setPassword(encoder.encode(user.getPassword()));
+    if (user.getImage() == null || user.getImage().isEmpty()) {
+      user.setImage("https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg");
+    }
     newUser.setImage(user.getImage());
     newUser.setActive(false);
 
