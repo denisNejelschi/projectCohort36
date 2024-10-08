@@ -1,11 +1,12 @@
 package gr36.clubActiv.services.interfaces;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
+import gr36.clubActiv.domain.entity.User;
 import java.util.List;
 
 public interface ActivityService {
 
-  ActivityDto create(ActivityDto activityDto);
+  ActivityDto create(ActivityDto activityDto, User author);
 
   List<ActivityDto> getAllActivities();
 

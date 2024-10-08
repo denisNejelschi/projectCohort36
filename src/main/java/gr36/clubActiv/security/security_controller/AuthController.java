@@ -66,7 +66,7 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
   }
-
+//logout
   @DeleteMapping("/logout")
   public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
     String refreshToken = token.substring(7);

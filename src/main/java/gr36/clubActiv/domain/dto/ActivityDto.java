@@ -1,25 +1,51 @@
 package gr36.clubActiv.domain.dto;
 
+import gr36.clubActiv.domain.entity.Activity;
 import java.time.LocalDate;
-import java.util.Objects;
-
+import java.util.List;
+import gr36.clubActiv.domain.entity.User;
 
 public class ActivityDto {
 
   private Long id;
-
-  private  String title;
-
-  private  String address;
-
+  private String title;
+  private String address;
   private LocalDate startDate;
-
   private String image;
-
   private String description;
+  private Long authorId;  // Reference to the ID of the user who created the activity
+  private List<Long> userIds;  // List of user IDs participating in the activity
 
+  // Default constructor
+  public ActivityDto() {}
 
+  // Constructor that includes all fields
+  public ActivityDto(Long id, String title, String address, LocalDate startDate, String image,
+      String description, Long authorId, List<Long> userIds) {
+    this.id = id;
+    this.title = title;
+    this.address = address;
+    this.startDate = startDate;
+    this.image = image;
+    this.description = description;
+    this.authorId = authorId;
+    this.userIds = userIds;
+  }
 
+  // Constructor to map from an Activity entity
+  public ActivityDto(Activity activity) {
+    this.id = activity.getId();
+    this.title = activity.getTitle();
+    this.address = activity.getAddress();
+    this.startDate = activity.getStartDate();
+    this.image = activity.getImage();
+    this.description = activity.getDescription();
+    this.authorId = activity.getAuthor() != null ? activity.getAuthor().getId() : null;
+    this.userIds = activity.getUsers() != null ?
+        activity.getUsers().stream().map(User::getId).toList() : null;
+  }
+
+  // Getters and setters
   public Long getId() {
     return id;
   }
@@ -68,27 +94,33 @@ public class ActivityDto {
     this.description = description;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof ActivityDto that)) {
-      return false;
-    }
-    return Objects.equals(getId(), that.getId()) && Objects.equals(getTitle(),
-        that.getTitle());
+  public Long getAuthorId() {
+    return authorId;
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId(), getTitle());
+  public void setAuthorId(Long authorId) {
+    this.authorId = authorId;
+  }
+
+  public List<Long> getUserIds() {
+    return userIds;
+  }
+
+  public void setUserIds(List<Long> userIds) {
+    this.userIds = userIds;
   }
 
   @Override
   public String toString() {
-    return String.format("Activity: id - %d, title - %s, address - %s, startDate - %s, image - %s, "
-            + "description - %s",
-        id, title, address, startDate, image, description);
+    return "ActivityDto{" +
+        "id=" + id +
+        ", title='" + title + '\'' +
+        ", address='" + address + '\'' +
+        ", startDate=" + startDate +
+        ", image='" + image + '\'' +
+        ", description='" + description + '\'' +
+        ", authorId=" + authorId +
+        ", userIds=" + userIds +
+        '}';
   }
 }

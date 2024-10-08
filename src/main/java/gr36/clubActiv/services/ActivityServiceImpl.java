@@ -30,16 +30,17 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  @Transactional
-  public ActivityDto create(ActivityDto dto) {
-    try {
-      Activity entity = mappingService.mapDtoToEntity(dto);
-      repository.save(entity);
-      return mappingService.mapEntityToDto(entity);
-    } catch (Exception e) {
-      throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
-    }
+  public ActivityDto create(ActivityDto activityDto, User author) {
+    Activity activity = new Activity();
+    activity.setTitle(activityDto.getTitle());
+    activity.setDescription(activityDto.getDescription());
+    activity.setStartDate(activityDto.getStartDate());
+    activity.setAddress(activityDto.getAddress());
+    activity.setAuthor(author); // Assign the logged-in user as the author
 
+    // Use the repository to save the activity
+    repository.save(activity);
+    return new ActivityDto(activity);
   }
 
 
@@ -87,7 +88,6 @@ public class ActivityServiceImpl implements ActivityService {
     if (!activity.getUsers().contains(user)) {
       activity.addUser(user);
     }
-
 
     return mappingService.mapEntityToDto(activity);
   }

@@ -1,14 +1,16 @@
 package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
+import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.services.interfaces.ActivityService;
-import jakarta.persistence.EntityNotFoundException;
+import gr36.clubActiv.services.interfaces.UserService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,10 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ActivityController {
 
   private final ActivityService service;
+  private final UserService userService;
   private static final Logger log = LoggerFactory.getLogger(ActivityController.class);
 
-  public ActivityController(ActivityService service) {
+  public ActivityController(ActivityService service, UserService userService) {
     this.service = service;
+    this.userService = userService;
   }
 
   @GetMapping("/test")
@@ -37,12 +41,20 @@ public class ActivityController {
   }
 
   @PostMapping
-  public ResponseEntity<ActivityDto> create(@RequestBody ActivityDto activity) {
-    log.info("Creating new activity: {}", activity);
-    ActivityDto createdActivity = service.create(activity);
+  public ResponseEntity<ActivityDto> create(@RequestBody ActivityDto activityDto, Authentication authentication) {
+    log.info("Creating new activity: {}", activityDto);
+
+    // Extract the current logged-in user from the authentication object
+    String username = authentication.getName();
+    User author = userService.findByUsername(username)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+
+    // Call the service with both the ActivityDto and the author
+    ActivityDto createdActivity = service.create(activityDto, author);
     log.info("Activity created successfully with ID: {}", createdActivity.getId());
     return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
   }
+
 
 
   @GetMapping
@@ -53,26 +65,19 @@ public class ActivityController {
 
   @GetMapping("/{id}")
   public ResponseEntity<ActivityDto> getActivityById(@PathVariable Long id) {
-      log.info("Fetching activity by ID: {}", id);
-      ActivityDto activity = service.getActivityById(id);
-      return ResponseEntity.ok(activity);
+    log.info("Fetching activity by ID: {}", id);
+    ActivityDto activity = service.getActivityById(id);
+    return ResponseEntity.ok(activity);
   }
 
   @PutMapping("/update/{id}")
   public ResponseEntity<?> update(
       @PathVariable("id") Long id,
       @RequestBody ActivityDto dto) {
-      log.info("Updating activity with ID: {}", id);
-      ActivityDto updatedActivity = service.update(id, dto);
-      return ResponseEntity.ok(updatedActivity);
+    log.info("Updating activity with ID: {}", id);
+    ActivityDto updatedActivity = service.update(id, dto);
+    return ResponseEntity.ok(updatedActivity);
   }
-
-//  @DeleteMapping("/{id}")
-//  public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
-//      log.info("Deleting activity with ID: {}", id);
-//      service.deleteActivity(id);
-//      return ResponseEntity.noContent().build();
-//   }
 
   @DeleteMapping("/{id}")// TODO creator and admin can delete only
   @PreAuthorize("hasRole('ADMIN')")
@@ -93,7 +98,8 @@ public class ActivityController {
   }
 
   @PutMapping("/{activity_id}/add-user/{user_id}") //TODO POST -> PUT
-  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
+  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id,
+      @PathVariable Long user_id) {
     ActivityDto updatedActivity = service.addUserToActivity(activity_id, user_id);
     return ResponseEntity.ok(updatedActivity); // Возвращаем обновленную активность
   }
@@ -105,10 +111,11 @@ public class ActivityController {
   }
 
   @DeleteMapping("/{activity_id}/remove-user/{user_id}")
-  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
+  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id,
+      @PathVariable Long user_id) {
     log.info("Delete activities for user ID: {}", user_id); // Логирование
-      ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, user_id);
-      return ResponseEntity.ok(updatedActivity);
+    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, user_id);
+    return ResponseEntity.ok(updatedActivity);
   }
 
 }
