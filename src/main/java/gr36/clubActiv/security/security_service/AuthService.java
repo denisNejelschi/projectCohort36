@@ -7,6 +7,8 @@ import io.jsonwebtoken.Claims;
 import jakarta.security.auth.message.AuthException;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,20 @@ public class AuthService {
       return new TokenResponseDto(accessToken, null);
     }
     throw new AuthException("Refresh token is incorrect");
+  }
+
+  public UserDetails getCurrentUser() throws AuthException {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication != null) {
+      System.out.println("Authentication found: " + authentication);
+      System.out.println("Is authenticated: " + authentication.isAuthenticated());
+      System.out.println("Principal: " + authentication.getPrincipal());
+      if (authentication.isAuthenticated()) {
+        String username = authentication.getName();
+        return userService.loadUserByUsername(username);
+      }
+    }
+    throw new AuthException("No authenticated user found");
   }
 
 }

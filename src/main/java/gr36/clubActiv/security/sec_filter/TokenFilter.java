@@ -30,23 +30,36 @@ public class TokenFilter extends GenericFilterBean {
   // фильтр
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-    String token = getTokenFromRequest((HttpServletRequest) servletRequest); // можем сделать безопасный кастинг так как servletRequest расширяет HttpServletRequest
+    HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+    String token = getTokenFromRequest(httpRequest);
 
-    if(token != null && service.validateAccessToken(token)){
+    logger.info("Received token: " + (token != null ? "Token present" : "No token"));
+
+    if (token != null && service.validateAccessToken(token)) {
+      logger.info("Token is valid");
+
+      // Получаем claims из токена
       Claims claims = service.getAccessClaims(token);
+
+      // Извлекаем информацию о пользователе из токена
       AuthInfo authInfo = service.mapClaimsToAuthInfo(claims);
-      authInfo.setAuthenticated(true);
+
+      // Устанавливаем аутентификацию в контекст безопасности
       SecurityContextHolder.getContext().setAuthentication(authInfo);
+
+      logger.info("User authenticated: " + authInfo.getName());
+    } else {
+      logger.warn("Invalid or missing token");
     }
-    filterChain.doFilter(servletRequest, servletResponse); // отправляем запрос дальше по цепочке фильтров
+
+    // Продолжаем цепочку фильтров
+    filterChain.doFilter(servletRequest, servletResponse);
   }
 
-  private String getTokenFromRequest(HttpServletRequest request){
-    // заголовок Authorization -> Bearer 2k3424bmn234bm2b34mb2m3b2m2b34
-    String token = request.getHeader("Authorization");
-
-    if(token != null && token.startsWith("Bearer ")){
-      return token.substring(7); // отбросили Bearer
+  private String getTokenFromRequest(HttpServletRequest request) {
+    String bearerToken = request.getHeader("Authorization");
+    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
     }
     return null;
   }
