@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
   public void registrationConfirm(String code) {
     User user = confirmationService.getUserByConfirmationCode(code);
     user.setActive(true);
+    confirmationCodeRepository.deleteByUserId(user.getId());
   }
 
   @Override

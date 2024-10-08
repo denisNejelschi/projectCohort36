@@ -57,7 +57,7 @@ public class EmailServiceImpl implements EmailService {
     try {
       template = mailConfig.getTemplate("confirm_reg_mail.ftlh");
       String code = confirmationService.generateConfirmationCode(user);
-      String url = "http://localhost:8080/register?code=" + code;
+      String url = "http://localhost:8080/api/register?code=" + code;
       // Для добавления данных в шаблон создаём мап:
       // name -> Vasya
       // link -> localhost:8080/register?code=87fdsf6sf-fsffsd-f87sdf
