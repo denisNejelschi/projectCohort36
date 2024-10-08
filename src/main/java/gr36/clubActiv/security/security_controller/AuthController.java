@@ -9,9 +9,11 @@ import gr36.clubActiv.services.interfaces.UserService;
 import jakarta.security.auth.message.AuthException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
@@ -63,5 +65,12 @@ public class AuthController {
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
+  }
+
+  @DeleteMapping("/logout")
+  public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+    String refreshToken = token.substring(7);
+    authService.logout(refreshToken);
+    return ResponseEntity.ok("Logged out successfully");
   }
 }
