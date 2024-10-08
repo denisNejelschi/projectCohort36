@@ -28,5 +28,5 @@ public interface UserService extends UserDetailsService {
 
   int countAdmins();
 
-  User findByUsername(String username);
+  Optional<User> findByUsername(String username);
 }

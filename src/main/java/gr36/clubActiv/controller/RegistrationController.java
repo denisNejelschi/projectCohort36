@@ -2,17 +2,15 @@ package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.exeption_handling.Response;
+import gr36.clubActiv.exeption_handling.exeptions.UserAlreadyExistsException;
 import gr36.clubActiv.services.interfaces.UserService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/register")
+@RequestMapping("api/register")
 public class RegistrationController {
 
   private final UserService service;
@@ -22,23 +20,27 @@ public class RegistrationController {
   }
 
   @PostMapping
-  public Response register(@Valid @RequestBody User user) {
+  public ResponseEntity<Response> register(@Valid @RequestBody User user) {
     try {
       service.register(user);
-      return new Response("Registration complete. Please check your email.");
+      return ResponseEntity.ok(new Response("Registration complete. Please check your email.", 200));
+    } catch (UserAlreadyExistsException e) {
+      // Handle the case when the email is already registered
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(new Response("Registration failed: " + e.getMessage(), 409));
     } catch (IllegalArgumentException e) {
-      return new Response("Registration failed: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Registration failed: " + e.getMessage(), 400));
     }
   }
 
   @GetMapping
-  public Response registrationConfirm(@RequestParam String code) {
+  public ResponseEntity<Response> registrationConfirm(@RequestParam String code) {
     try {
       service.registrationConfirm(code);
-      return new Response("Registration confirmed successfully");
+      return ResponseEntity.ok(new Response("Registration confirmed successfully", 200));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Confirmation failed: " + e.getMessage(), 400));
     } catch (Exception e) {
-      return new Response("Confirmation failed: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response("An error occurred: " + e.getMessage(), 500));
     }
   }
 }
-

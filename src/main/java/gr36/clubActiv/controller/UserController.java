@@ -56,17 +56,13 @@ public class UserController {
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
     return userService.findById(id)
         .map(user -> {
-
           if (userService.isLastAdmin(id)) {
-
             return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
           }
           userService.delete(id);
           return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
-
-
 }
 
 

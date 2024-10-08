@@ -62,12 +62,15 @@ public class UserServiceImpl implements UserService {
     if (existingUser.isPresent()) {
       throw new UserAlreadyExistsException("Email already registered");
     }
-
+//test
     User newUser = new User();
     newUser.setUsername(user.getUsername());
     newUser.setRoles(Set.of(roleService.getRoleUser()));
     newUser.setEmail(user.getEmail());
     newUser.setPassword(encoder.encode(user.getPassword()));
+    if (user.getImage() == null || user.getImage().isEmpty()) {
+      user.setImage("https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg");
+    }
     newUser.setImage(user.getImage());
     newUser.setActive(false);
 
@@ -79,6 +82,7 @@ public class UserServiceImpl implements UserService {
   public void registrationConfirm(String code) {
     User user = confirmationService.getUserByConfirmationCode(code);
     user.setActive(true);
+    confirmationCodeRepository.deleteByUserId(user.getId());
   }
 
   @Override
@@ -134,8 +138,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User findByUsername(String username) {
-    return userRepository.findByUsername(username).orElse(null);
+  public Optional<User> findByUsername(String username) {
+    return userRepository.findByUsername(username);
   }
 
 

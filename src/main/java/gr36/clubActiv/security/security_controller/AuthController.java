@@ -7,58 +7,70 @@ import gr36.clubActiv.security.sec_dto.TokenResponseDto;
 import gr36.clubActiv.security.security_service.AuthService;
 import gr36.clubActiv.services.interfaces.UserService;
 import jakarta.security.auth.message.AuthException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-  private AuthService service;
-  private UserService userService;
+  private final AuthService authService;
+  private final UserService userService;
 
-  public AuthController(AuthService service, UserService userService) {
-    this.service = service;
+  public AuthController(AuthService authService, UserService userService) {
+    this.authService = authService;
     this.userService = userService;
   }
 
-  //endpoint для аутентификации пользователя
+  // Endpoint for user login
   @PostMapping("/login")
-  public TokenResponseDto login(@RequestBody User user) throws AuthException {
+  public ResponseEntity<TokenResponseDto> login(@RequestBody User user) throws AuthException {
     try {
-      return service.login(user);
+      TokenResponseDto tokenResponse = authService.login(user);
+      return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Authentication failed", e);
     }
   }
 
+  // Endpoint for refreshing the access token
   @PostMapping("/refresh")
-  public TokenResponseDto getNewAccessToken(@RequestBody RefreshRequestDto request) {
+  public ResponseEntity<TokenResponseDto> getNewAccessToken(
+      @RequestBody RefreshRequestDto request) {
     try {
-      return service.getNewAccessToken(request.getRefreshToken());
+      TokenResponseDto tokenResponse = authService.getNewAccessToken(request.getRefreshToken());
+      return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to refresh token", e);
     }
   }
 
-  @GetMapping("/user")
+  // Endpoint to get current authenticated user information
+  @GetMapping("/me")
   public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    String username = authentication.getName();  // Get username from token
 
-    if (authentication != null && authentication.isAuthenticated()) {
-      String username = authentication.getName();
-      UserDetails userDetails = userService.loadUserByUsername(username);
-      // Преобразуйте UserDetails в DTO, если нужно
-      return ResponseEntity.ok(userDetails);
+    try {
+      User currentUser = userService.findByUsername(username)
+          .orElseThrow(() -> new RuntimeException("User not found"));
+      return ResponseEntity.ok(new UserResponseDto(currentUser));
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
   }
-
+//logout
+  @DeleteMapping("/logout")
+  public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
+    String refreshToken = token.substring(7);
+    authService.logout(refreshToken);
+    return ResponseEntity.ok("Logged out successfully");
+  }
 }
