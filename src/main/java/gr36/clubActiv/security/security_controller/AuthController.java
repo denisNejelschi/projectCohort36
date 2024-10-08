@@ -53,18 +53,15 @@ public class AuthController {
 
   // Endpoint to get current authenticated user information
   @GetMapping("/me")
-  public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication) {
-    String username = authentication.getName();
+  public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+    String username = authentication.getName();  // Get username from token
 
     try {
-
       User currentUser = userService.findByUsername(username)
           .orElseThrow(() -> new RuntimeException("User not found"));
-
       return ResponseEntity.ok(new UserResponseDto(currentUser));
     } catch (RuntimeException e) {
-
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
   }
 }
