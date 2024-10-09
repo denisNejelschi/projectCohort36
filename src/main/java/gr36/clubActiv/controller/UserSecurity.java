@@ -15,11 +15,9 @@ public class UserSecurity {
   }
 
   public boolean isCurrentUser(Long userId) {
-    // Get the current authentication object
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String currentUsername = authentication.getName();
 
-    // Fetch the user from the database using the username
     return userService.findById(userId)
         .map(user -> user.getUsername().equals(currentUsername))
         .orElse(false);

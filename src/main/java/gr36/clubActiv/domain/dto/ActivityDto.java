@@ -1,9 +1,10 @@
 package gr36.clubActiv.domain.dto;
 
 import gr36.clubActiv.domain.entity.Activity;
+import gr36.clubActiv.domain.entity.User;
+
 import java.time.LocalDate;
 import java.util.List;
-import gr36.clubActiv.domain.entity.User;
 
 public class ActivityDto {
 
@@ -13,26 +14,12 @@ public class ActivityDto {
   private LocalDate startDate;
   private String image;
   private String description;
-  private Long authorId;  // Reference to the ID of the user who created the activity
-  private List<Long> userIds;  // List of user IDs participating in the activity
+  private Long authorId;
+  private List<Long> userIds;
 
   // Default constructor
   public ActivityDto() {}
 
-  // Constructor that includes all fields
-  public ActivityDto(Long id, String title, String address, LocalDate startDate, String image,
-      String description, Long authorId, List<Long> userIds) {
-    this.id = id;
-    this.title = title;
-    this.address = address;
-    this.startDate = startDate;
-    this.image = image;
-    this.description = description;
-    this.authorId = authorId;
-    this.userIds = userIds;
-  }
-
-  // Constructor to map from an Activity entity
   public ActivityDto(Activity activity) {
     this.id = activity.getId();
     this.title = activity.getTitle();
@@ -45,7 +32,6 @@ public class ActivityDto {
         activity.getUsers().stream().map(User::getId).toList() : null;
   }
 
-  // Getters and setters
   public Long getId() {
     return id;
   }
