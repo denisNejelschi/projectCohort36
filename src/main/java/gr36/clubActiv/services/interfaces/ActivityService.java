@@ -2,6 +2,7 @@ package gr36.clubActiv.services.interfaces;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.User;
+
 import java.util.List;
 
 public interface ActivityService {
@@ -10,16 +11,15 @@ public interface ActivityService {
 
   List<ActivityDto> getAllActivities();
 
-  ActivityDto update(Long id, ActivityDto dto); // delete id
+  ActivityDto update(Long id, ActivityDto dto);
 
   ActivityDto getActivityById(Long id);
 
   void deleteActivity(Long id);
 
-  ActivityDto addUserToActivity(Long activity_id, Long user_id);
+  ActivityDto addUserToActivity(Long activityId, Long userId);
 
-  List<ActivityDto> getActivitiesByUserId(Long user_id);
+  List<ActivityDto> getActivitiesByUserId(Long userId);
 
-  ActivityDto removeUserFromActivity(Long activity_id, Long user_id);
-
+  ActivityDto removeUserFromActivity(Long activityId, Long userId);
 }

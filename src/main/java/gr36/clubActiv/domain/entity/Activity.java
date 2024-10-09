@@ -46,7 +46,7 @@ public class Activity {
   }
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "author_id")
   private User author;
 
