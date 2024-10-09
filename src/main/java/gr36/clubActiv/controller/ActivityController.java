@@ -91,9 +91,13 @@ public class ActivityController {
     return ResponseEntity.noContent().build();
   }
 
-  @PutMapping("/{activity_id}/add-user/{user_id}")
-  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
-    ActivityDto updatedActivity = service.addUserToActivity(activity_id, user_id);
+  @PutMapping("/{activity_id}/add-user")
+
+  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, Authentication authentication) {
+    String username = authentication.getName();
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+    ActivityDto updatedActivity = service.addUserToActivity(activity_id, username);
     return ResponseEntity.ok(updatedActivity);
   }
 
@@ -113,23 +117,27 @@ public class ActivityController {
     return ResponseEntity.ok(activities);
   }
 
-  @DeleteMapping("/remove-user/{activity_id}")
+  @DeleteMapping("/{activity_id}/remove-user")
   public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id, Authentication authentication) {
     String currentUsername = authentication.getName();
     User currentUser = userService.findByUsername(currentUsername)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
-
     ActivityDto activity = service.getActivityById(activity_id);
 
     boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+
     boolean isAdmin = authentication.getAuthorities().stream()
         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
+    log.info("Checking authorization for user: {}, isAdmin: {}, isAuthor: {}", currentUsername, isAdmin, isAuthor);
+
     if (!isAdmin && !isAuthor) {
+      log.warn("User {} is not authorized to remove users from activity {}", currentUsername, activity_id);
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to remove users from this activity.");
     }
 
-    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, currentUser.getId());
+    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, currentUser.getUsername());
     return ResponseEntity.ok(updatedActivity);
   }
+
 }

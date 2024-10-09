@@ -17,9 +17,9 @@ public interface ActivityService {
 
   void deleteActivity(Long id);
 
-  ActivityDto addUserToActivity(Long activityId, Long userId);
+  ActivityDto addUserToActivity(Long activityId, String username);
 
   List<ActivityDto> getActivitiesByUserId(Long userId);
 
-  ActivityDto removeUserFromActivity(Long activityId, Long userId);
+  ActivityDto removeUserFromActivity(Long activityId, String username);
 }

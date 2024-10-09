@@ -94,11 +94,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityDto addUserToActivity(Long activityId, Long userId) {
+  public ActivityDto addUserToActivity(Long activityId, String username) {
     Activity activity = repository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new UserNotFoundException(userId));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException(username));
 
     if (!activity.getUsers().contains(user)) {
       activity.addUser(user);
@@ -118,11 +118,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   @Transactional
-  public ActivityDto removeUserFromActivity(Long activityId, Long userId) {
+  public ActivityDto removeUserFromActivity(Long activityId, String username) {
     Activity activity = repository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new UserNotFoundException(userId));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException(username));
 
     if (activity.getUsers().contains(user)) {
       activity.getUsers().remove(user);
