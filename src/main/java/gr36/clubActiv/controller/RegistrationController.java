@@ -23,12 +23,14 @@ public class RegistrationController {
   public ResponseEntity<Response> register(@Valid @RequestBody User user) {
     try {
       service.register(user);
-      return ResponseEntity.ok(new Response("Registration complete. Please check your email.", 200));
+      return ResponseEntity.ok(
+          new Response("Registration complete. Please check your email.", 200));
     } catch (UserAlreadyExistsException e) {
-      // Handle the case when the email is already registered
-      return ResponseEntity.status(HttpStatus.CONFLICT).body(new Response("Registration failed: " + e.getMessage(), 409));
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new Response("Registration failed: " + e.getMessage(), 409));
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Registration failed: " + e.getMessage(), 400));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new Response("Registration failed: " + e.getMessage(), 400));
     }
   }
 
@@ -38,9 +40,11 @@ public class RegistrationController {
       service.registrationConfirm(code);
       return ResponseEntity.ok(new Response("Registration confirmed successfully", 200));
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response("Confirmation failed: " + e.getMessage(), 400));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new Response("Confirmation failed: " + e.getMessage(), 400));
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response("An error occurred: " + e.getMessage(), 500));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new Response("An error occurred: " + e.getMessage(), 500));
     }
   }
 }
