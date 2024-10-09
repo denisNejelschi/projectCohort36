@@ -3,14 +3,14 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
-import gr36.clubActiv.exeption_handling.exeptions.ActivityCreationException;
+
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
 import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.mapping.ActivityMappingService;
-import jakarta.persistence.EntityNotFoundException;
+
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -2,6 +2,7 @@ package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.interfaces.UserService;
 import java.util.List;
@@ -44,12 +45,12 @@ public class ActivityController {
   public ResponseEntity<ActivityDto> create(@RequestBody ActivityDto activityDto, Authentication authentication) {
     log.info("Creating new activity: {}", activityDto);
 
-    // Extract the current logged-in user from the authentication object
+
     String username = authentication.getName();
     User author = userService.findByUsername(username)
         .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // Call the service with both the ActivityDto and the author
+
     ActivityDto createdActivity = service.create(activityDto, author);
     log.info("Activity created successfully with ID: {}", createdActivity.getId());
     return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
@@ -104,11 +105,22 @@ public class ActivityController {
     return ResponseEntity.ok(updatedActivity); // Возвращаем обновленную активность
   }
 
-  @GetMapping("/user/{userId}/activities")
-  public List<ActivityDto> getActivitiesByUserId(@PathVariable Long userId) {
-    log.info("Fetching activities for user ID: {}", userId); // Логирование
-    return service.getActivitiesByUserId(userId);
+  @GetMapping("/my-activities")
+  public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
+    String username = authentication.getName();
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+
+    List<ActivityDto> activities;
+    if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+      activities = service.getAllActivities();
+    } else {
+      activities = service.getActivitiesByUserId(user.getId());
+    }
+
+    return ResponseEntity.ok(activities);
   }
+
 
   @DeleteMapping("/{activity_id}/remove-user/{user_id}")
   public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id,
@@ -117,5 +129,6 @@ public class ActivityController {
     ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, user_id);
     return ResponseEntity.ok(updatedActivity);
   }
+
 
 }

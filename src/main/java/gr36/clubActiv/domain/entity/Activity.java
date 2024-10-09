@@ -45,10 +45,10 @@ public class Activity {
     }
   }
 
-  // New field to store the author who created the activity
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "author_id")
-  private User author;  // Author who created the activity
+  private User author;
 
   // Getters and Setters
   public Long getId() {
