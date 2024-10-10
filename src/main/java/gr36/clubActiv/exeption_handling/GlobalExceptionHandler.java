@@ -54,6 +54,20 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(AuthenticationFailedException.class)
+  public ResponseEntity<Response> handleAuthenticationFailed(AuthenticationFailedException e) {
+    log.error("AuthenticationFailedException occurred: {}", e.getMessage());
+    Response response = new Response(e.getMessage(), HttpStatus.UNAUTHORIZED.value());
+    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(TokenRefreshException.class)
+  public ResponseEntity<Response> handleTokenRefreshException(TokenRefreshException e) {
+    log.error("TokenRefreshException occurred: {}", e.getMessage());
+    Response response = new Response(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(ConfirmationFailedException.class)
   public ResponseEntity<Response> handleException(ConfirmationFailedException e) {
     log.error("ConfirmationFailedException occurred: {}", e.getMessage());
