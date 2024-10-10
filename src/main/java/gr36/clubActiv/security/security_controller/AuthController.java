@@ -32,12 +32,16 @@ public class AuthController {
 
   // Endpoint for user login
   @PostMapping("/login")
-  public ResponseEntity<TokenResponseDto> login(@RequestBody User user) throws AuthException {
+  public ResponseEntity<?> login(@RequestBody User user) {
     try {
       TokenResponseDto tokenResponse = authService.login(user);
       return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
-      throw new RuntimeException("Authentication failed", e);
+
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password or username.");
+    } catch (Exception e) {
+
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
     }
   }
 
