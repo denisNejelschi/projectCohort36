@@ -6,7 +6,6 @@ import gr36.clubActiv.security.sec_filter.TokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,26 +34,30 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
-        .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless JWT authentication
-        .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
-        .httpBasic(AbstractHttpConfigurer::disable) // Disable basic auth
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .httpBasic(AbstractHttpConfigurer::disable)
         .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // Custom JWT filter
         .authorizeHttpRequests(x -> x
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET,"/api/users").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET,"/api/users/{id}").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE,"/api/users/{id}").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET,"/api/users/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE,"/api/users/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.PUT,"/api/users/{id}").hasRole("ADMIN")
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user/{user_id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.GET, "/api/activity/user/{userId}/activities").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user/{user_id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll() // Allow login and refresh for everyone
-            .requestMatchers(HttpMethod.POST, "/register").permitAll() // Public registration
-            .requestMatchers(HttpMethod.GET, "/register").permitAll() // Public registration page
+            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
+            .requestMatchers(HttpMethod.POST, "api/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "api/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+            .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
+            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").authenticated()
+
         ).build();
   }
 }
