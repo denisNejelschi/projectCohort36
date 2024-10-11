@@ -2,7 +2,9 @@ package gr36.clubActiv.controller;
 
 
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.services.interfaces.UserService;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,15 +56,26 @@ public class UserController {
   @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-    return userService.findById(id)
-        .map(user -> {
-          if (userService.isLastAdmin(id)) {
-            return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
-          }
-          userService.delete(id);
-          return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    Optional<User> optionalUser = userService.findById(id);
+
+    if (optionalUser.isPresent()) {
+      User user = optionalUser.get();
+
+      if (userService.isLastAdmin(id)) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN); // 403 Forbidden, если это последний админ
+      }
+
+      userService.delete(id);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content, если удаление прошло успешно
+    } else {
+      throw new UserNotFoundException(id); // Выбрасываем исключение, если пользователь не найден
+    }
   }
+
+
+
+
+
 }
 
 

@@ -103,6 +103,10 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void delete(Long id) {
+    if (!repository.existsById(id)) {
+      throw new UserNotFoundException(id); // Это исключение будет перехвачено, если пользователь не найден.
+    }
+
     confirmationCodeRepository.deleteByUserId(id);
     repository.deleteById(id);
   }
