@@ -16,10 +16,15 @@ public class UserSecurity {
 
   public boolean isCurrentUser(Long userId) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return false;
+    }
+
     String currentUsername = authentication.getName();
 
     return userService.findById(userId)
         .map(user -> user.getUsername().equals(currentUsername))
         .orElse(false);
   }
+
 }

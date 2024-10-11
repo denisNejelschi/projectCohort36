@@ -11,6 +11,10 @@ public interface UserService extends UserDetailsService {
 
   void register(User user);
 
+  Optional<User> update( Long id, User updatedUser);
+
+
+
   void registrationConfirm(String code);
 
   List<User> findAll();

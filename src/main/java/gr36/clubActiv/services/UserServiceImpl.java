@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,7 +35,6 @@ public class UserServiceImpl implements UserService {
   private final ConfirmationService confirmationService;
   private final ConfirmationCodeRepository confirmationCodeRepository;
   private final UserRepository userRepository;
-
 
 
   public UserServiceImpl(UserRepository repository, RoleService roleService,
@@ -79,6 +80,53 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public Optional<User> update(Long id, User updatedUser) {
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null || !authentication.isAuthenticated()
+        || authentication.getPrincipal() == null) {
+      throw new RuntimeException("Authenticated user not found");
+    }
+
+    String currentUsername = null;
+
+    if (authentication.getPrincipal() instanceof UserDetails) {
+      currentUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
+    } else if (authentication.getPrincipal() instanceof String) {
+      currentUsername = (String) authentication.getPrincipal();  // It's a username string
+    }
+
+    User authenticatedUser = userRepository.findByUsername(currentUsername)
+        .orElseThrow(() -> new UsernameNotFoundException("Authenticated user not found"));
+
+    boolean isAdmin = authenticatedUser.getRoles().stream()
+        .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
+
+    User userToUpdate = userRepository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + id));
+
+    if (!isAdmin && !authenticatedUser.getId().equals(userToUpdate.getId())) {
+      throw new RuntimeException("You can only update your own profile");
+    }
+
+    if (updatedUser.getEmail() != null) {
+      userToUpdate.setEmail(updatedUser.getEmail());
+    }
+
+    if (updatedUser.getUsername() != null) {
+      userToUpdate.setUsername(updatedUser.getUsername());
+    }
+
+    if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+      userToUpdate.setPassword(encoder.encode(updatedUser.getPassword()));
+    }
+
+    return Optional.of(userRepository.save(userToUpdate));
+  }
+
+
+  @Override
   public void registrationConfirm(String code) {
     User user = confirmationService.getUserByConfirmationCode(code);
     user.setActive(true);
@@ -121,7 +169,7 @@ public class UserServiceImpl implements UserService {
 
     if (isAdmin) {
       long adminCount = repository.countByRole("ROLE_ADMIN");
-      return adminCount <= 1;  // Prevent deletion if last admin
+      return adminCount <= 1;
 
     }
 

@@ -40,18 +40,14 @@ public class UserController {
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
-  @PreAuthorize("hasRole('ADMIN') or  @userSecurity.isCurrentUser(#id)")
+  @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @PutMapping("/{id}")
   public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-    return userService.findById(id)
-        .map(userToUpdate -> {
-          userToUpdate.setEmail(updatedUser.getEmail());
-          if (updatedUser.getPassword() != null) {
-            userToUpdate.setPassword(encoder.encode(updatedUser.getPassword()));
-          }
-          return new ResponseEntity<>(userService.save(userToUpdate), HttpStatus.OK);
-        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return userService.update(id, updatedUser)
+        .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
+
 
   @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
   @DeleteMapping("/{id}")
