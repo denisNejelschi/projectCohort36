@@ -42,28 +42,28 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.GET,"/api/users").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET,"/api/users/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE,"/api/users/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.PUT,"/api/users/{id}").hasRole("ADMIN")
+
+            // User management: allow ADMIN to update any user and regular users to update themselves
+            .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+
+            // This line allows ADMIN to update any user, but regular users to update only their own profile
+            .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
+
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
+
+            // Authentication and registration routes
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
-            .requestMatchers(HttpMethod.POST, "api/register").permitAll()
-            .requestMatchers(HttpMethod.GET, "api/register").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
             .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
-            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").authenticated()
 
         ).build();
   }
 }
-
-
-
-//        .sessionManagement(x -> x
-//    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-//    .httpBasic(Customizer.withDefaults())
