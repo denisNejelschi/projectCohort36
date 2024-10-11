@@ -35,12 +35,16 @@ public class AuthController {
 
   // Endpoint for user login
   @PostMapping("/login")
+
   public ResponseEntity<TokenResponseDto> login(@RequestBody User user) {
+
     try {
       TokenResponseDto tokenResponse = authService.login(user);
       return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
+
       throw new AuthenticationFailedException("Authentication failed: Invalid credentials");
+
     }
   }
 
