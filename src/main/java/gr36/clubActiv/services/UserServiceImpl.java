@@ -92,7 +92,8 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Optional<User> findById(Long id) {
-    return repository.findById(id).or(() -> Optional.empty());
+    return Optional.ofNullable(repository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException(id)));
   }
 
   @Override
@@ -103,6 +104,10 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void delete(Long id) {
+    if (!repository.existsById(id)) {
+      throw new UserNotFoundException(id); // Это исключение будет перехвачено, если пользователь не найден.
+    }
+
     confirmationCodeRepository.deleteByUserId(id);
     repository.deleteById(id);
   }

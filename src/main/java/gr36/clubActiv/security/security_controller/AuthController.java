@@ -2,6 +2,9 @@ package gr36.clubActiv.security.security_controller;
 
 import gr36.clubActiv.domain.dto.UserResponseDto;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.AuthenticationFailedException;
+import gr36.clubActiv.exeption_handling.exeptions.TokenRefreshException;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.security.sec_dto.RefreshRequestDto;
 import gr36.clubActiv.security.sec_dto.TokenResponseDto;
 import gr36.clubActiv.security.security_service.AuthService;
@@ -32,28 +35,27 @@ public class AuthController {
 
   // Endpoint for user login
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody User user) {
+
+  public ResponseEntity<TokenResponseDto> login(@RequestBody User user) {
+
     try {
       TokenResponseDto tokenResponse = authService.login(user);
       return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
 
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password or username.");
-    } catch (Exception e) {
+      throw new AuthenticationFailedException("Authentication failed: Invalid credentials");
 
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
     }
   }
 
   // Endpoint for refreshing the access token
   @PostMapping("/refresh")
-  public ResponseEntity<TokenResponseDto> getNewAccessToken(
-      @RequestBody RefreshRequestDto request) {
+  public ResponseEntity<TokenResponseDto> getNewAccessToken(@RequestBody RefreshRequestDto request) {
     try {
       TokenResponseDto tokenResponse = authService.getNewAccessToken(request.getRefreshToken());
       return ResponseEntity.ok(tokenResponse);
     } catch (AuthException e) {
-      throw new RuntimeException("Failed to refresh token", e);
+      throw new TokenRefreshException("Failed to refresh token: Invalid or expired refresh token");
     }
   }
 
@@ -64,13 +66,14 @@ public class AuthController {
 
     try {
       User currentUser = userService.findByUsername(username)
-          .orElseThrow(() -> new RuntimeException("User not found"));
+          .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
       return ResponseEntity.ok(new UserResponseDto(currentUser));
-    } catch (RuntimeException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+    } catch (UserNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
   }
-//logout
+
+  // Endpoint for user logout
   @DeleteMapping("/logout")
   public ResponseEntity<String> logout(@RequestHeader("Authorization") String token) {
     String refreshToken = token.substring(7);
