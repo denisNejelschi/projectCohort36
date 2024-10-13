@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/activity")
 public class ActivityController {
@@ -32,7 +33,7 @@ public class ActivityController {
     log.info("Creating new activity: {}", activityDto);
     String username = authentication.getName();
     User author = userService.findByUsername(username)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
 
     ActivityDto createdActivity = service.create(activityDto, author);
     log.info("Activity created successfully with ID: {}", createdActivity.getId());

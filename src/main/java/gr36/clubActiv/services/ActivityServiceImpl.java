@@ -3,6 +3,7 @@ package gr36.clubActiv.services;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityCreationException;
 import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
 import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.repository.ActivityRepository;
@@ -32,16 +33,23 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  @Transactional
   public ActivityDto create(ActivityDto activityDto, User author) {
-    Activity activity = new Activity();
-    activity.setTitle(activityDto.getTitle());
-    activity.setDescription(activityDto.getDescription());
-    activity.setStartDate(activityDto.getStartDate());
-    activity.setAddress(activityDto.getAddress());
-    activity.setAuthor(author);
+    try {
+      Activity activity = new Activity();
+      activity.setTitle(activityDto.getTitle());
+      activity.setDescription(activityDto.getDescription());
+      activity.setStartDate(activityDto.getStartDate());
+      activity.setImage(activityDto.getImage());
 
-    repository.save(activity);
-    return new ActivityDto(activity);
+      activity.setAddress(activityDto.getAddress());
+      activity.setAuthor(author);
+
+      repository.save(activity);
+      return new ActivityDto(activity);
+      } catch (Exception e) {
+      throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
+    }
   }
 
   @Override
