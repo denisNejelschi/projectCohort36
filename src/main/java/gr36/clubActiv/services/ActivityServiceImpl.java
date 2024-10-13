@@ -41,7 +41,6 @@ public class ActivityServiceImpl implements ActivityService {
       activity.setDescription(activityDto.getDescription());
       activity.setStartDate(activityDto.getStartDate());
       activity.setImage(activityDto.getImage());
-
       activity.setAddress(activityDto.getAddress());
       activity.setAuthor(author);
 
@@ -87,7 +86,6 @@ public class ActivityServiceImpl implements ActivityService {
     if (dto.getDescription() != null) {
       activity.setDescription(dto.getDescription());
     }
-
     repository.save(activity);
     return new ActivityDto(activity);
   }
@@ -112,7 +110,6 @@ public class ActivityServiceImpl implements ActivityService {
       activity.addUser(user);
       repository.save(activity);
     }
-
     return mappingService.mapEntityToDto(activity);
   }
 
@@ -136,11 +133,6 @@ public class ActivityServiceImpl implements ActivityService {
       activity.getUsers().remove(user);
       repository.save(activity);
     }
-
     return mappingService.mapEntityToDto(activity);
   }
-
-
-
 }
-
