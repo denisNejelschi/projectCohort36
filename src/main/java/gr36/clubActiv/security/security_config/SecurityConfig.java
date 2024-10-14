@@ -50,6 +50,8 @@ public class SecurityConfig {
 
             // This line allows ADMIN to update any user, but regular users to update only their own profile
             .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
+            .requestMatchers(HttpMethod.POST, "/api/news").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/news").hasAnyRole("ADMIN", "USER")
 
             .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
