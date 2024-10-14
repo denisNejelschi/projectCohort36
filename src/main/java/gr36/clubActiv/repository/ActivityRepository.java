@@ -12,4 +12,5 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
    Optional<Activity> findByTitle(String title);
    List<Activity> findByUsersId(Long user_id);
 
+  
 }
