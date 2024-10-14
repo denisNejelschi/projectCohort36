@@ -17,7 +17,7 @@ public class Images {
       "https://my-activity-images.s3.eu-north-1.amazonaws.com/10.webp"
   };
 
-  // Function to return a random image URL from S3
+
   public String getRandomImage() {
     Random random = new Random();
     int index = random.nextInt(imageLinks.length);
