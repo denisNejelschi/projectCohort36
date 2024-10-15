@@ -12,6 +12,7 @@ import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.mapping.ActivityMappingService;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,15 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityMappingService mappingService;
   private final UserRepository userRepository;
   private static final Logger log = LoggerFactory.getLogger(ActivityServiceImpl.class);
+  private final ActivityRepository activityRepository;
 
 
   public ActivityServiceImpl(ActivityRepository repository, ActivityMappingService mappingService,
-      UserRepository userRepository) {
+      UserRepository userRepository, ActivityRepository activityRepository) {
     this.repository = repository;
     this.mappingService = mappingService;
     this.userRepository = userRepository;
+    this.activityRepository = activityRepository;
   }
 
   private String getRandomImage() {
@@ -43,6 +46,11 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   @Transactional
   public ActivityDto create(ActivityDto activityDto, User author) {
+    Optional<Activity> activityToCheck = activityRepository.findByTitle(activityDto.getTitle());
+    if (activityToCheck.isPresent()) {
+      throw new ActivityCreationException(
+          "This activity - " + activityDto.getTitle() + ", already exists");
+    }
 
     try {
       Activity activity = new Activity();
@@ -62,6 +70,7 @@ public class ActivityServiceImpl implements ActivityService {
 
       repository.save(activity);
       return new ActivityDto(activity);
+
     } catch (Exception e) {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }

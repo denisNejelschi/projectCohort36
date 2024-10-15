@@ -29,12 +29,12 @@ public class ActivityController {
   }
 
   @PostMapping
-  public ResponseEntity<ActivityDto> create(@RequestBody ActivityDto activityDto, Authentication authentication) {
+  public ResponseEntity<ActivityDto> create(@RequestBody ActivityDto activityDto,
+      Authentication authentication) {
     log.info("Creating new activity: {}", activityDto);
     String username = authentication.getName();
     User author = userService.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
-
     ActivityDto createdActivity = service.create(activityDto, author);
     log.info("Activity created successfully with ID: {}", createdActivity.getId());
     return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
@@ -54,18 +54,21 @@ public class ActivityController {
   }
 
   @PutMapping("/update/{id}")
-  public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody ActivityDto dto, Authentication authentication) {
+  public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody ActivityDto dto,
+      Authentication authentication) {
     String currentUsername = authentication.getName();
     ActivityDto activity = service.getActivityById(id);
     User currentUser = userService.findByUsername(currentUsername)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
-    boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+    boolean isAuthor =
+        activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
 
     boolean isAdmin = authentication.getAuthorities().stream()
         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
     if (!isAdmin && !isAuthor) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this activity");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body("You are not authorized to update this activity");
     }
 
     ActivityDto updatedActivity = service.update(id, dto);
@@ -79,12 +82,14 @@ public class ActivityController {
     User currentUser = userService.findByUsername(currentUsername)
         .orElseThrow(() -> new RuntimeException("User not found"));
 
-    boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+    boolean isAuthor =
+        activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
     boolean isAdmin = authentication.getAuthorities().stream()
         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
     if (!isAdmin && !isAuthor) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this activity");
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body("You are not authorized to delete this activity");
     }
 
     service.deleteActivity(id);
@@ -94,7 +99,8 @@ public class ActivityController {
 
   @PutMapping("/{activity_id}/add-user")
 
-  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, Authentication authentication) {
+  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id,
+      Authentication authentication) {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -119,25 +125,31 @@ public class ActivityController {
   }
 
   @DeleteMapping("/{activity_id}/remove-user")
-  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id, Authentication authentication) {
+  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id,
+      Authentication authentication) {
     String currentUsername = authentication.getName();
     User currentUser = userService.findByUsername(currentUsername)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
     ActivityDto activity = service.getActivityById(activity_id);
 
-    boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+    boolean isAuthor =
+        activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
 
     boolean isAdmin = authentication.getAuthorities().stream()
         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
-    log.info("Checking authorization for user: {}, isAdmin: {}, isAuthor: {}", currentUsername, isAdmin, isAuthor);
+    log.info("Checking authorization for user: {}, isAdmin: {}, isAuthor: {}", currentUsername,
+        isAdmin, isAuthor);
 
     if (!isAdmin && !isAuthor) {
-      log.warn("User {} is not authorized to remove users from activity {}", currentUsername, activity_id);
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to remove users from this activity.");
+      log.warn("User {} is not authorized to remove users from activity {}", currentUsername,
+          activity_id);
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body("You are not authorized to remove users from this activity.");
     }
 
-    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, currentUser.getUsername());
+    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id,
+        currentUser.getUsername());
     return ResponseEntity.ok(updatedActivity);
   }
 
