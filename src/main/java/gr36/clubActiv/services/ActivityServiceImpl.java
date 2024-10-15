@@ -57,13 +57,14 @@ public class ActivityServiceImpl implements ActivityService {
       activity.setTitle(activityDto.getTitle());
       activity.setDescription(activityDto.getDescription());
       activity.setStartDate(activityDto.getStartDate());
-      if (activityDto.getImage() != null) {
+      if (activityDto.getImage() != null && !activityDto.getImage().isEmpty()) {
         activity.setImage(activityDto.getImage());
         log.info("Image provided: " + activityDto.getImage());
       } else {
         activity.setImage(getRandomImage());
         log.info("No image provided, using random image: " + activity.getImage());
       }
+
 
       activity.setAddress(activityDto.getAddress());
       activity.setAuthor(author);
@@ -75,21 +76,18 @@ public class ActivityServiceImpl implements ActivityService {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }
   }
-
   @Override
   public List<ActivityDto> getAllActivities() {
     return repository.findAll().stream()
         .map(mappingService::mapEntityToDto)
         .toList();
   }
-
   @Override
   public ActivityDto getActivityById(Long id) {
     Activity activity = repository.findById(id)
         .orElseThrow(() -> new ActivityNotFoundException(id));
     return mappingService.mapEntityToDto(activity);
   }
-
   @Override
   @Transactional
   public ActivityDto update(Long id, ActivityDto dto) {
