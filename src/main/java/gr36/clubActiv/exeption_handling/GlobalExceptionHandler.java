@@ -1,30 +1,78 @@
 package gr36.clubActiv.exeption_handling;
 
-import gr36.clubActiv.exeption_handling.exeptions.ConfirmationFailedException;
+import gr36.clubActiv.exeption_handling.exeptions.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-// 3 способ обработки ошибок
-// ПЛЮС - у нас есть глобальный обработчик ошибок, который
-// позволяет перехватить исключения, возникающие в любом
-// месте проекта, при этом отправив клиенту нужное сообщение
-// вместе с нужным http-статусом
-// ПЛЮС - всю логику обработки ошибок мы выносим в отдельное место
-// проекта (то есть в этот класс), тем самым мы не загромождаем
-// основную логику логикой обработки ошибок. Вся логика обработки
-// ошибок у нас сконцентрирована в одном месте, что облегчает её доработку.
-// МИНУС - при данном подходе мы не можем прописать какую-то специфичную
-// логику обработки ошибок под какой-то конкретный контроллер.
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+  @ExceptionHandler(ActivityNotFoundException.class)
+  public ResponseEntity<Response> handleException(ActivityNotFoundException e) {
+    log.error("ActivityNotFoundException occurred: {}", e.getMessage());
+
+    Response response = new Response(e.getMessage(), HttpStatus.NOT_FOUND.value());
+    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<Response> handleException(UserNotFoundException e) {
+    log.error("UserNotFoundException occurred: {}", e.getMessage());
+
+    Response response = new Response(e.getMessage(), HttpStatus.NOT_FOUND.value());
+    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(ActivityCreationException.class)
+  public ResponseEntity<Response> handleException(ActivityCreationException e) {
+    log.error("ActivityCreationException occurred: {}", e.getMessage());
+
+    Response response = new Response(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(UserAlreadyExistsException.class)
+  public ResponseEntity<Response> handleException(UserAlreadyExistsException e) {
+    log.error("UserAlreadyExistsException occurred: {}", e.getMessage());
+
+    String detailedMessage = String.format("User with the provided email already exists: %s", e.getMessage());
+    Response response = new Response(detailedMessage, HttpStatus.CONFLICT.value());
+    return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+  }
+
+  @ExceptionHandler(RoleNotFoundException.class)
+  public ResponseEntity<Response> handleException(RoleNotFoundException e) {
+    log.error("RoleNotFoundException occurred: {}", e.getMessage());
+
+    Response response = new Response(e.getMessage(), HttpStatus.NOT_FOUND.value());
+    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(AuthenticationFailedException.class)
+  public ResponseEntity<Response> handleAuthenticationFailed(AuthenticationFailedException e) {
+    log.error("AuthenticationFailedException occurred: {}", e.getMessage());
+    Response response = new Response(e.getMessage(), HttpStatus.UNAUTHORIZED.value());
+    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
+
+  @ExceptionHandler(TokenRefreshException.class)
+  public ResponseEntity<Response> handleTokenRefreshException(TokenRefreshException e) {
+    log.error("TokenRefreshException occurred: {}", e.getMessage());
+    Response response = new Response(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
 
   @ExceptionHandler(ConfirmationFailedException.class)
   public ResponseEntity<Response> handleException(ConfirmationFailedException e) {
-    Response response = new Response(e.getMessage());
+    log.error("ConfirmationFailedException occurred: {}", e.getMessage());
+
+    Response response = new Response(e.getMessage(), HttpStatus.BAD_REQUEST.value());
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 }

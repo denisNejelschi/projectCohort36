@@ -21,16 +21,16 @@ public class ConfirmationServiceImpl implements ConfirmationService {
   @Override
   public String generateConfirmationCode(User user) {
 
-    //LocalDateTime expired = LocalDateTime.now().plusDays(1); //production
+
     LocalDateTime expired = LocalDateTime.now().plusMinutes(60);
 
-    //generate code
+
     String code = UUID.randomUUID().toString();
 
-    //create object
+
     ConfirmationCode entity = new ConfirmationCode(code, expired, user);
 
-    //save to repository
+
     repository.save(entity);
 
     return code;
@@ -51,6 +51,14 @@ public class ConfirmationServiceImpl implements ConfirmationService {
     }
 
     return entity.getUser();
+
+  }
+
+
+
+  @Override
+  public void deleteByUserId(Long userId) {
+    repository.deleteByUserId(userId);
   }
 
 

@@ -1,51 +1,43 @@
 package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
+import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
 import gr36.clubActiv.services.interfaces.ActivityService;
-import jakarta.persistence.EntityNotFoundException;
-import java.util.List;
+import gr36.clubActiv.services.interfaces.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+//@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/activity")
 public class ActivityController {
 
   private final ActivityService service;
+  private final UserService userService;
   private static final Logger log = LoggerFactory.getLogger(ActivityController.class);
 
-  public ActivityController(ActivityService service) {
+  public ActivityController(ActivityService service, UserService userService) {
     this.service = service;
-  }
-
-  @GetMapping("/test")
-  public String test() {
-    log.info("Test endpoint called");
-    return "Hello World";
+    this.userService = userService;
   }
 
   @PostMapping
-  public ResponseEntity<?> create(@RequestBody ActivityDto activity) {
-    try {
-      log.info("Creating new activity: {}", activity);
-      ActivityDto createdActivity = service.create(activity);
-      log.info("Activity created successfully with ID: {}", createdActivity.getId());
-      return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
-    } catch (Exception e) {
-      log.error("Error while creating activity", e);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to create activity");
-    }
+  public ResponseEntity<ActivityDto> create(@RequestBody ActivityDto activityDto, Authentication authentication) {
+    log.info("Creating new activity: {}", activityDto);
+    String username = authentication.getName();
+    User author = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+    ActivityDto createdActivity = service.create(activityDto, author);
+    log.info("Activity created successfully with ID: {}", createdActivity.getId());
+    return ResponseEntity.status(HttpStatus.CREATED).body(createdActivity);
   }
 
   @GetMapping
@@ -56,75 +48,97 @@ public class ActivityController {
 
   @GetMapping("/{id}")
   public ResponseEntity<ActivityDto> getActivityById(@PathVariable Long id) {
-    try {
-      log.info("Fetching activity by ID: {}", id);
-      ActivityDto activity = service.getActivityById(id);
-      return ResponseEntity.ok(activity);
-    } catch (EntityNotFoundException e) {
-      log.error("Activity not found with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-    } catch (Exception e) {
-      log.error("Error while fetching activity by ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+    log.info("Fetching activity by ID: {}", id);
+    ActivityDto activity = service.getActivityById(id);
+    return ResponseEntity.ok(activity);
   }
 
   @PutMapping("/update/{id}")
-  public ResponseEntity<?> update(
-      @PathVariable("id") Long id,
-      @RequestBody ActivityDto dto) {
-    try {
-      log.info("Updating activity with ID: {}", id);
-      ActivityDto updatedActivity = service.update(id, dto);
-      return ResponseEntity.ok(updatedActivity);
-    } catch (EntityNotFoundException e) {
-      log.error("Activity not found with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Activity not found");
-    } catch (Exception e) {
-      log.error("Error while updating activity with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update activity");
+  public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody ActivityDto dto, Authentication authentication) {
+    String currentUsername = authentication.getName();
+    ActivityDto activity = service.getActivityById(id);
+    User currentUser = userService.findByUsername(currentUsername)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+    boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+
+    boolean isAdmin = authentication.getAuthorities().stream()
+        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+    if (!isAdmin && !isAuthor) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this activity");
     }
+
+    ActivityDto updatedActivity = service.update(id, dto);
+    return ResponseEntity.ok(updatedActivity);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteActivity(@PathVariable Long id) {
-    try {
-      log.info("Deleting activity with ID: {}", id);
-      service.deleteActivity(id);
-      return ResponseEntity.noContent().build();
-    } catch (EntityNotFoundException e) {
-      log.error("Activity not found with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Activity not found");
-    } catch (Exception e) {
-      log.error("Error while deleting activity with ID: {}", id, e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete activity");
+  public ResponseEntity<?> delete(@PathVariable Long id, Authentication authentication) {
+    String currentUsername = authentication.getName();
+    ActivityDto activity = service.getActivityById(id);
+    User currentUser = userService.findByUsername(currentUsername)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+
+    boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+    boolean isAdmin = authentication.getAuthorities().stream()
+        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+    if (!isAdmin && !isAuthor) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this activity");
     }
+
+    service.deleteActivity(id);
+    log.info("Activity with ID {} deleted successfully.", id);
+    return ResponseEntity.noContent().build();
   }
 
-  @PostMapping("/{activity_id}/add-user/{user_id}") //TODO POST -> PUT
-  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
-    ActivityDto updatedActivity = service.addUserToActivity(activity_id, user_id);
-    return ResponseEntity.ok(updatedActivity); // Возвращаем обновленную активность
+  @PutMapping("/{activity_id}/add-user")
+
+  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id, Authentication authentication) {
+    String username = authentication.getName();
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+    ActivityDto updatedActivity = service.addUserToActivity(activity_id, username);
+    return ResponseEntity.ok(updatedActivity);
   }
 
-  @GetMapping("/user/{userId}/activities")
-  public List<ActivityDto> getActivitiesByUserId(@PathVariable Long userId) {
-    log.info("Fetching activities for user ID: {}", userId); // Логирование
-    return service.getActivitiesByUserId(userId);
-  }
+  @GetMapping("/my-activities")
+  public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
+    String username = authentication.getName();
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-  @DeleteMapping("/{activity_id}/remove-user/{user_id}")
-  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id, @PathVariable Long user_id) {
-    try {
-      ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, user_id);
-      return ResponseEntity.ok(updatedActivity);
-    } catch (IllegalArgumentException e) {
-      // Handle invalid activity_id or user_id
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    } catch (Exception e) {
-      // Handle other exceptions
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to remove user from activity");
+    List<ActivityDto> activities;
+    if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+      activities = service.getAllActivities();
+    } else {
+      activities = service.getActivitiesByUserId(user.getId());
     }
+
+    return ResponseEntity.ok(activities);
+  }
+
+  @DeleteMapping("/{activity_id}/remove-user")
+  public ResponseEntity<?> removeUserFromActivity(@PathVariable Long activity_id, Authentication authentication) {
+    String currentUsername = authentication.getName();
+    User currentUser = userService.findByUsername(currentUsername)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+    ActivityDto activity = service.getActivityById(activity_id);
+
+    boolean isAuthor = activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+
+    boolean isAdmin = authentication.getAuthorities().stream()
+        .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+    log.info("Checking authorization for user: {}, isAdmin: {}, isAuthor: {}", currentUsername, isAdmin, isAuthor);
+
+    if (!isAdmin && !isAuthor) {
+      log.warn("User {} is not authorized to remove users from activity {}", currentUsername, activity_id);
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to remove users from this activity.");
+    }
+
+    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id, currentUser.getUsername());
+    return ResponseEntity.ok(updatedActivity);
   }
 
 }

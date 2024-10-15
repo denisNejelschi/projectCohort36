@@ -6,7 +6,6 @@ import gr36.clubActiv.security.sec_filter.TokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,45 +20,66 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  private final TokenFilter filter;
 
-  // field - наш собственный фильтр
-  private TokenFilter filter;
-
-  // constructor
   public SecurityConfig(TokenFilter filter) {
     this.filter = filter;
   }
 
   @Bean
-  public BCryptPasswordEncoder encoder(){
+  public BCryptPasswordEncoder encoder() {
     return new BCryptPasswordEncoder();
   }
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
-        .csrf(AbstractHttpConfigurer :: disable)
-        .sessionManagement(x -> x
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // отключили сессии
-        .httpBasic(AbstractHttpConfigurer::disable) // отключили базовую авторизацию
-        .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // добавили свой фильтр
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // Custom JWT filter
         .authorizeHttpRequests(x -> x
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
+
+            // User management: allow ADMIN to update any user and regular users to update themselves
+            .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+
+            // This line allows ADMIN to update any user, but regular users to update only their own profile
+            .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
+            .requestMatchers(HttpMethod.POST, "/api/news").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.GET, "/api/news").hasAnyRole("ADMIN", "USER")
+
+            //Reviews
+            .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
+
+            //Responses
+            .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/review").permitAll()
+
+            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}")
+            .hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.POST, "/api/activity/{activity_id}/add-user/{user_id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.GET, "/api/activity/user/{userId}/activities").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user/{user_id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/refresh").permitAll() // разрешаем всем доступ к этим endpoints
-            .requestMatchers(HttpMethod.POST, "/register").permitAll()
-            .requestMatchers(HttpMethod.GET, "/register").permitAll()
-//                .anyRequest().permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user")
+            .hasAnyRole("ADMIN", "USER")
+
+            // Authentication and registration routes
+            .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+            .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
+
         ).build();
   }
 }
-
-//        .sessionManagement(x -> x
-//    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-//    .httpBasic(Customizer.withDefaults())
