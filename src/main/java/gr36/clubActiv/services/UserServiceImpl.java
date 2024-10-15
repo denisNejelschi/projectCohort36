@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     if (existingUser.isPresent()) {
       throw new UserAlreadyExistsException("Email already registered");
     }
-//test
+
     User newUser = new User();
     newUser.setUsername(user.getUsername());
     newUser.setRoles(Set.of(roleService.getRoleUser()));

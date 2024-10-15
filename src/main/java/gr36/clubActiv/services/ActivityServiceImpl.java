@@ -1,5 +1,6 @@
 package gr36.clubActiv.services;
 
+import gr36.Images;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
@@ -24,6 +25,8 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityRepository repository;
   private final ActivityMappingService mappingService;
   private final UserRepository userRepository;
+  private static final Logger log = LoggerFactory.getLogger(ActivityServiceImpl.class);
+
 
   public ActivityServiceImpl(ActivityRepository repository, ActivityMappingService mappingService,
       UserRepository userRepository) {
@@ -32,21 +35,34 @@ public class ActivityServiceImpl implements ActivityService {
     this.userRepository = userRepository;
   }
 
+  private String getRandomImage() {
+    Images images = new Images();
+    return images.getRandomImage();
+  }
+
   @Override
   @Transactional
   public ActivityDto create(ActivityDto activityDto, User author) {
+
     try {
       Activity activity = new Activity();
       activity.setTitle(activityDto.getTitle());
       activity.setDescription(activityDto.getDescription());
       activity.setStartDate(activityDto.getStartDate());
-      activity.setImage(activityDto.getImage());
+      if (activityDto.getImage() != null) {
+        activity.setImage(activityDto.getImage());
+        log.info("Image provided: " + activityDto.getImage());
+      } else {
+        activity.setImage(getRandomImage());
+        log.info("No image provided, using random image: " + activity.getImage());
+      }
+
       activity.setAddress(activityDto.getAddress());
       activity.setAuthor(author);
 
       repository.save(activity);
       return new ActivityDto(activity);
-      } catch (Exception e) {
+    } catch (Exception e) {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }
   }
