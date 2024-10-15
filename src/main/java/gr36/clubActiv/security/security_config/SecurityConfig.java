@@ -34,24 +34,34 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // Custom JWT filter
-        .authorizeHttpRequests(x -> x
-            .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class) // Custom JWT filter
+            .authorizeHttpRequests(x -> x
+                    .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
 
-            // User management: allow ADMIN to update any user and regular users to update themselves
-            .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+                    // User management: allow ADMIN to update any user and regular users to update themselves
+                    .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
 
-            // This line allows ADMIN to update any user, but regular users to update only their own profile
-            .requestMatchers(HttpMethod.PUT, "/api/users/{id}").authenticated()
-            .requestMatchers(HttpMethod.POST, "/api/news").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.GET, "/api/news").hasAnyRole("ADMIN", "USER")
+                    // News management
+                    .requestMatchers(HttpMethod.POST, "/api/news").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/news").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.PUT, "/api/news/{id}").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/news/{id}").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.DELETE, "/api/news/{id}").hasRole("ADMIN")
+
+
+                    .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
+                    .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
 
             //Reviews
             .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
@@ -73,13 +83,15 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user")
             .hasAnyRole("ADMIN", "USER")
 
-            // Authentication and registration routes
-            .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/register").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
-            .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
 
-        ).build();
+                    // Authentication and registration routes
+                    .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/register").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
+
+            ).build();
   }
+
 }
