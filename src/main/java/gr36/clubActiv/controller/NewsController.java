@@ -63,6 +63,4 @@ public class NewsController {
             .orElseThrow(() -> new RuntimeException("News not found"));
     return ResponseEntity.ok(news);
   }
-
-
 }

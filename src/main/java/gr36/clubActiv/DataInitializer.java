@@ -29,7 +29,7 @@ public class DataInitializer implements CommandLineRunner {
   public void run(String... args) throws Exception {
     if (userService.countAdmins() == 0) {
       User admin = new User();
-      admin.setUsername("TEST_ADMIN");
+      admin.setUsername("ADMIN");
       admin.setEmail("testadmin@example.com");
       admin.setPassword(encoder.encode("111"));
       admin.setRoles(Set.of(roleService.getRoleAdmin()));
