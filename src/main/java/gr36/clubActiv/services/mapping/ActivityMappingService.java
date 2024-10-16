@@ -10,8 +10,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ActivityMappingService {
 
-  @Mapping(target = "id", ignore = true)
-  Activity mapDtoToEntity(ActivityDto dto);
+  @Mapping(source = "author.id", target = "authorId")
   ActivityDto mapEntityToDto(Activity entity);
 
+  @Mapping(target = "author.id", source = "authorId")
+  Activity mapDtoToEntity(ActivityDto dto);
 }
