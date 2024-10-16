@@ -1,5 +1,6 @@
 package gr36.clubActiv.services;
 
+import gr36.Images;
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.Activity;
 import gr36.clubActiv.domain.entity.User;
@@ -11,6 +12,7 @@ import gr36.clubActiv.repository.UserRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.mapping.ActivityMappingService;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,47 +26,68 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityRepository repository;
   private final ActivityMappingService mappingService;
   private final UserRepository userRepository;
+  private static final Logger log = LoggerFactory.getLogger(ActivityServiceImpl.class);
+  private final ActivityRepository activityRepository;
+
 
   public ActivityServiceImpl(ActivityRepository repository, ActivityMappingService mappingService,
-      UserRepository userRepository) {
+      UserRepository userRepository, ActivityRepository activityRepository) {
     this.repository = repository;
     this.mappingService = mappingService;
     this.userRepository = userRepository;
+    this.activityRepository = activityRepository;
+  }
+
+  private String getRandomImage() {
+    Images images = new Images();
+    return images.getRandomImage();
   }
 
   @Override
   @Transactional
   public ActivityDto create(ActivityDto activityDto, User author) {
+    Optional<Activity> activityToCheck = activityRepository.findByTitle(activityDto.getTitle());
+    if (activityToCheck.isPresent()) {
+      throw new ActivityCreationException(
+          "This activity - " + activityDto.getTitle() + ", already exists");
+    }
+
     try {
       Activity activity = new Activity();
       activity.setTitle(activityDto.getTitle());
       activity.setDescription(activityDto.getDescription());
       activity.setStartDate(activityDto.getStartDate());
-      activity.setImage(activityDto.getImage());
+      if (activityDto.getImage() != null && !activityDto.getImage().isEmpty()) {
+        activity.setImage(activityDto.getImage());
+        log.info("Image provided: " + activityDto.getImage());
+      } else {
+        activity.setImage(getRandomImage());
+        log.info("No image provided, using random image: " + activity.getImage());
+      }
+
+
       activity.setAddress(activityDto.getAddress());
       activity.setAuthor(author);
 
       repository.save(activity);
       return new ActivityDto(activity);
-      } catch (Exception e) {
+
+    } catch (Exception e) {
       throw new ActivityCreationException("Error while creating activity: " + e.getMessage());
     }
   }
-
   @Override
   public List<ActivityDto> getAllActivities() {
     return repository.findAll().stream()
         .map(mappingService::mapEntityToDto)
         .toList();
   }
-
   @Override
   public ActivityDto getActivityById(Long id) {
     Activity activity = repository.findById(id)
         .orElseThrow(() -> new ActivityNotFoundException(id));
     return mappingService.mapEntityToDto(activity);
   }
-
   @Override
   @Transactional
   public ActivityDto update(Long id, ActivityDto dto) {

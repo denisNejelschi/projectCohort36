@@ -11,8 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/news")
@@ -38,6 +40,7 @@ public class NewsController {
 
     return ResponseEntity.status(HttpStatus.CREATED).body(createdNews);
   }
+
   @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<News> updateNews(@PathVariable Long id, @RequestBody News newsDetails) {
@@ -70,4 +73,5 @@ public class NewsController {
     NewsDto newsDto = new NewsDto(news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername());
     return ResponseEntity.ok(newsDto);
   }
+
 }

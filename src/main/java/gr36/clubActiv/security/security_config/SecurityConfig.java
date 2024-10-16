@@ -56,11 +56,33 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/news/{id}").hasAnyRole("ADMIN", "USER")
                     .requestMatchers(HttpMethod.DELETE, "/api/news/{id}").hasRole("ADMIN")
 
+
                     .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
                     .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
                     .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
                     .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
                     .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
+
+            //Reviews
+            .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
+
+            //Responses
+            .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/review").permitAll()
+
+            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities")
+            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user")
+            .hasAnyRole("ADMIN", "USER")
+
 
                     // Authentication and registration routes
                     .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
