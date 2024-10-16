@@ -47,7 +47,9 @@ public class User implements UserDetails {
   )
   private Set<Activity> activities;
 
-  // Getters and Setters
+  public Set<Activity> getActivities() {
+    return activities;
+  }
 
   public Set<Role> getRoles() {
     return roles;
@@ -109,7 +111,7 @@ public class User implements UserDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return roles;  // Roles are already implementing GrantedAuthority
+    return roles;
   }
 
 
