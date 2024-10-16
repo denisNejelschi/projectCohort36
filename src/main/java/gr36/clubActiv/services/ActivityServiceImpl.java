@@ -13,6 +13,7 @@ import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.mapping.ActivityMappingService;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,6 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setImage(getRandomImage());
         log.info("No image provided, using random image: " + activity.getImage());
       }
-
 
       activity.setAddress(activityDto.getAddress());
       activity.setAuthor(author);
@@ -144,18 +144,38 @@ public class ActivityServiceImpl implements ActivityService {
         .toList();
   }
 
-  @Override
+
   @Transactional
-  public ActivityDto removeUserFromActivity(Long activityId, String username) {
+  public void removeUserFromActivity(Long activityId, String username) {
+    Activity activity = activityRepository.findById(activityId)
+        .orElseThrow(() -> new ActivityNotFoundException(activityId));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException(username));
+
+    if (!activity.getUsers().contains(user)) {
+      throw new IllegalArgumentException("User is not registered for this activity.");
+    }
+
+    activity.getUsers().remove(user);
+    activityRepository.save(activity);
+  }
+
+  public boolean isUserRegistered(Long activityId, String username) {
     Activity activity = repository.findById(activityId)
         .orElseThrow(() -> new ActivityNotFoundException(activityId));
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException(username));
 
-    if (activity.getUsers().contains(user)) {
-      activity.getUsers().remove(user);
-      repository.save(activity);
-    }
-    return mappingService.mapEntityToDto(activity);
+    return activity.getUsers().contains(user);
   }
+  @Override
+  public List<Long> getUserRegisteredActivities(String username) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+    return user.getActivities().stream()
+        .map(Activity::getId)
+        .collect(Collectors.toList());
+  }
+
 }

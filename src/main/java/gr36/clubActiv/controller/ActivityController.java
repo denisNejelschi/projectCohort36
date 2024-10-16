@@ -2,15 +2,19 @@ package gr36.clubActiv.controller;
 
 import gr36.clubActiv.domain.dto.ActivityDto;
 import gr36.clubActiv.domain.entity.User;
+import gr36.clubActiv.exeption_handling.exeptions.ActivityNotFoundException;
 import gr36.clubActiv.exeption_handling.exeptions.UserNotFoundException;
+import gr36.clubActiv.repository.ActivityRepository;
 import gr36.clubActiv.services.interfaces.ActivityService;
 import gr36.clubActiv.services.interfaces.UserService;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import gr36.clubActiv.domain.entity.Activity;
 
 import java.util.List;
 
@@ -22,10 +26,13 @@ public class ActivityController {
   private final ActivityService service;
   private final UserService userService;
   private static final Logger log = LoggerFactory.getLogger(ActivityController.class);
+  private final ActivityRepository activityRepository;
 
-  public ActivityController(ActivityService service, UserService userService) {
+  public ActivityController(ActivityService service, UserService userService,
+      ActivityRepository activityRepository) {
     this.service = service;
     this.userService = userService;
+    this.activityRepository = activityRepository;
   }
 
   @PostMapping
@@ -130,27 +137,76 @@ public class ActivityController {
     String currentUsername = authentication.getName();
     User currentUser = userService.findByUsername(currentUsername)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
-    ActivityDto activity = service.getActivityById(activity_id);
+
+    Activity activity = activityRepository.findById(activity_id)
+        .orElseThrow(() -> new ActivityNotFoundException(activity_id));
 
     boolean isAuthor =
-        activity.getAuthorId() != null && activity.getAuthorId().equals(currentUser.getId());
+        activity.getAuthor() != null && activity.getAuthor().getId().equals(currentUser.getId());
 
     boolean isAdmin = authentication.getAuthorities().stream()
         .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
 
-    log.info("Checking authorization for user: {}, isAdmin: {}, isAuthor: {}", currentUsername,
-        isAdmin, isAuthor);
+    boolean isParticipant = activity.getUsers().stream()
+        .anyMatch(user -> user.getId().equals(currentUser.getId()));
 
-    if (!isAdmin && !isAuthor) {
+    log.info("Checking authorization for user: {}, isAdmin: {}, isAuthor: {}, isParticipant: {}",
+        currentUsername, isAdmin, isAuthor, isParticipant);
+
+    if (!isAdmin && !isAuthor && !isParticipant) {
       log.warn("User {} is not authorized to remove users from activity {}", currentUsername,
           activity_id);
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body("You are not authorized to remove users from this activity.");
     }
 
-    ActivityDto updatedActivity = service.removeUserFromActivity(activity_id,
-        currentUser.getUsername());
-    return ResponseEntity.ok(updatedActivity);
+    try {
+      service.removeUserFromActivity(activity_id, currentUsername);
+      log.info("User {} has been removed from the activity {}", currentUsername, activity_id);
+      return ResponseEntity.ok("You have successfully removed yourself from the activity.");
+    } catch (IllegalArgumentException e) {
+      log.error("Error removing user from activity: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
   }
 
+  @GetMapping("/{id}/is-registered")
+  public ResponseEntity<Boolean> isUserRegistered(@PathVariable Long id,
+      Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      log.info("User is not authenticated");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+    }
+
+    String currentUsername = authentication.getName();
+    log.info("Authenticated user: {}", currentUsername);
+
+    boolean isRegistered = service.isUserRegistered(id, currentUsername);
+    return ResponseEntity.ok(isRegistered);
+  }
+
+
+  @GetMapping("/user/registered-activities")
+  public ResponseEntity<List<Long>> getUserRegisteredActivities(Authentication authentication) {
+    String username = authentication.getName();
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+    List<Long> activityIds;
+    if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+      activityIds = service.getAllActivities().stream()
+          .map(ActivityDto::getId)
+          .collect(Collectors.toList());
+    } else {
+      activityIds = service.getActivitiesByUserId(user.getId()).stream()
+          .map(ActivityDto::getId)
+          .collect(Collectors.toList());
+    }
+
+    return ResponseEntity.ok(activityIds);
+  }
+
+
 }
+
+
+
