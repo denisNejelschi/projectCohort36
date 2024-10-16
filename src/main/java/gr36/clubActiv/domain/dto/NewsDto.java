@@ -3,33 +3,20 @@ package gr36.clubActiv.domain.dto;
 import java.util.Objects;
 
 public class NewsDto {
-
-    private Long id;
     private String title;
     private String description;
     private String createdBy;
-    private String createdAt;
 
-
+    // Конструкторы
     public NewsDto() {}
 
-    public NewsDto(Long id, String title, String description, String createdBy, String createdAt) {
-        this.id = id;
+    public NewsDto(String title, String description, String createdBy) {
         this.title = title;
         this.description = description;
         this.createdBy = createdBy;
-        this.createdAt = createdAt;
     }
 
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
+    // Геттеры и сеттеры
     public String getTitle() {
         return title;
     }
@@ -54,34 +41,24 @@ public class NewsDto {
         this.createdBy = createdBy;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof NewsDto newsDto)) return false;
-        return Objects.equals(id, newsDto.id) && Objects.equals(title, newsDto.title) && Objects.equals(description, newsDto.description) && Objects.equals(createdBy, newsDto.createdBy) && Objects.equals(createdAt, newsDto.createdAt);
+        return Objects.equals(title, newsDto.title) && Objects.equals(description, newsDto.description) && Objects.equals(createdBy, newsDto.createdBy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, description, createdBy, createdAt);
+        return Objects.hash(title, description, createdBy);
     }
 
     @Override
     public String toString() {
         return "NewsDto{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
+                "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", createdBy='" + createdBy + '\'' +
-                ", createdAt='" + createdAt + '\'' +
                 '}';
     }
 }
