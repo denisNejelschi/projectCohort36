@@ -1,5 +1,6 @@
 package gr36.clubActiv.controller;
 
+import gr36.clubActiv.domain.dto.NewsDto;
 import gr36.clubActiv.domain.entity.News;
 import gr36.clubActiv.domain.entity.User;
 import gr36.clubActiv.services.interfaces.NewsService;
@@ -11,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/news")
@@ -49,18 +51,23 @@ public class NewsController {
     newsService.delete(id);
     return ResponseEntity.noContent().build();
   }
+
   @PreAuthorize("isAuthenticated()")
   @GetMapping
-  public ResponseEntity<List<News>> getAllNews() {
+  public ResponseEntity<List<NewsDto>> getAllNews() {
     List<News> newsList = newsService.findAll();
-    return ResponseEntity.ok(newsList);
+    List<NewsDto> newsDtoList = newsList.stream()
+            .map(news -> new NewsDto(news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername()))
+            .collect(Collectors.toList());
+    return ResponseEntity.ok(newsDtoList);
   }
 
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/{id}")
-  public ResponseEntity<News> getNewsById(@PathVariable Long id) {
+  public ResponseEntity<NewsDto> getNewsById(@PathVariable Long id) {
     News news = newsService.findById(id)
             .orElseThrow(() -> new RuntimeException("News not found"));
-    return ResponseEntity.ok(news);
+    NewsDto newsDto = new NewsDto(news.getTitle(), news.getDescription(), news.getCreatedBy().getUsername());
+    return ResponseEntity.ok(newsDto);
   }
 }
