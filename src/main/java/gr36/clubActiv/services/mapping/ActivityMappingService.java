@@ -12,16 +12,16 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface ActivityMappingService {
 
-  // Mapping from Activity entity to ActivityDto
+
   @Mapping(source = "author.id", target = "authorId")
   @Mapping(target = "userIds", expression = "java(mapUserIds(entity.getUsers()))")
   ActivityDto mapEntityToDto(Activity entity);
 
-  // Mapping from ActivityDto to Activity entity
+
   @Mapping(target = "author.id", source = "authorId")
   Activity mapDtoToEntity(ActivityDto dto);
 
-  // Custom method to map List<User> to List<Long> userIds
+
   default List<Long> mapUserIds(List<User> users) {
     return users != null ? users.stream().map(User::getId).collect(Collectors.toList()) : null;
   }
