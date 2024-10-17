@@ -26,5 +26,8 @@ public interface ActivityService {
 
   boolean isUserRegistered(Long activityId, String username);
 
-  List<Long> getUserRegisteredActivities(String username);;
+  List<Long> getUserRegisteredActivities(String username);
+
+  List<ActivityDto> getActivitiesByAuthor(Long authorId);
+
 }

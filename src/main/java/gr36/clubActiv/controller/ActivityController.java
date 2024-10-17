@@ -116,7 +116,7 @@ public class ActivityController {
     return ResponseEntity.ok(updatedActivity);
   }
 
-  @GetMapping("/my-activities")
+  @GetMapping("/my-activities") //returns activities where you are registered like participant!
   public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
@@ -199,6 +199,22 @@ public class ActivityController {
 
     return ResponseEntity.ok(activityIds);
   }
+
+  @GetMapping("/user/activities/created")
+  public ResponseEntity<List<ActivityDto>> getActivitiesByAuthor(Authentication authentication) {
+
+    String username = authentication.getName();
+
+
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+
+    List<ActivityDto> authoredActivities = service.getActivitiesByAuthor(user.getId());
+
+    return ResponseEntity.ok(authoredActivities);
+  }
+
 
 }
 
