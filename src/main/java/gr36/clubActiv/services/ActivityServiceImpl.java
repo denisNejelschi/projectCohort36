@@ -178,4 +178,13 @@ public class ActivityServiceImpl implements ActivityService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public List<ActivityDto> getActivitiesByAuthor(Long authorId) {
+    List<Activity> activities = activityRepository.findByAuthorId(authorId);
+    return activities.stream()
+        .map(mappingService::mapEntityToDto)
+        .collect(Collectors.toList());
+  }
+
+
 }

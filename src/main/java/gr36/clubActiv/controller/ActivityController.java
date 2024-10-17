@@ -19,6 +19,7 @@ import gr36.clubActiv.domain.entity.Activity;
 import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:5173")
+//comment to test
 @RestController
 @RequestMapping("/api/activity")
 public class ActivityController {
@@ -115,7 +116,7 @@ public class ActivityController {
     return ResponseEntity.ok(updatedActivity);
   }
 
-  @GetMapping("/my-activities")
+  @GetMapping("/my-activities") //returns activities where you are registered like participant!
   public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
@@ -191,18 +192,27 @@ public class ActivityController {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
-    List<Long> activityIds;
-    if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-      activityIds = service.getAllActivities().stream()
-          .map(ActivityDto::getId)
-          .collect(Collectors.toList());
-    } else {
-      activityIds = service.getActivitiesByUserId(user.getId()).stream()
-          .map(ActivityDto::getId)
-          .collect(Collectors.toList());
-    }
+
+    List<Long> activityIds = service.getActivitiesByUserId(user.getId()).stream()
+        .map(ActivityDto::getId)
+        .collect(Collectors.toList());
 
     return ResponseEntity.ok(activityIds);
+  }
+
+  @GetMapping("/user/activities/created")
+  public ResponseEntity<List<ActivityDto>> getActivitiesByAuthor(Authentication authentication) {
+
+    String username = authentication.getName();
+
+
+    User user = userService.findByUsername(username)
+        .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+
+    List<ActivityDto> authoredActivities = service.getActivitiesByAuthor(user.getId());
+
+    return ResponseEntity.ok(authoredActivities);
   }
 
 

@@ -46,6 +46,8 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}/is-registered").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/activity/user/registered-activities").authenticated()
+            .requestMatchers(HttpMethod.GET, "/api/activity/user/activities/created").authenticated()
+
 
             // User management: allow ADMIN to update any user and regular users to update themselves
             .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
