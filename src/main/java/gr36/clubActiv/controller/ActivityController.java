@@ -19,6 +19,7 @@ import gr36.clubActiv.domain.entity.Activity;
 import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:5173")
+//comment to test
 @RestController
 @RequestMapping("/api/activity")
 public class ActivityController {
