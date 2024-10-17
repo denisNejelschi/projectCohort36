@@ -192,20 +192,13 @@ public class ActivityController {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException("User not found"));
-    List<Long> activityIds;
-    if (user.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-      activityIds = service.getAllActivities().stream()
-          .map(ActivityDto::getId)
-          .collect(Collectors.toList());
-    } else {
-      activityIds = service.getActivitiesByUserId(user.getId()).stream()
-          .map(ActivityDto::getId)
-          .collect(Collectors.toList());
-    }
+
+    List<Long> activityIds = service.getActivitiesByUserId(user.getId()).stream()
+        .map(ActivityDto::getId)
+        .collect(Collectors.toList());
 
     return ResponseEntity.ok(activityIds);
   }
-
 
 }
 
