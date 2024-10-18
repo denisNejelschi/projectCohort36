@@ -1,5 +1,6 @@
 package gr36.clubActiv.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.Objects;
@@ -45,6 +46,7 @@ public class User implements UserDetails {
       joinColumns = @JoinColumn(name = "user_id"),
       inverseJoinColumns = @JoinColumn(name = "activity_id")
   )
+  @JsonIgnoreProperties("author")
   private Set<Activity> activities;
 
   public Set<Activity> getActivities() {
