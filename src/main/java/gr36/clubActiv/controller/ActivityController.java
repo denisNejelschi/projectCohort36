@@ -116,7 +116,7 @@ public class ActivityController {
     return ResponseEntity.ok(updatedActivity);
   }
 
-  @GetMapping("/my-activities") //returns activities where you are registered like participant!
+  @GetMapping("/my-activities")
   public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
     String username = authentication.getName();
     User user = userService.findByUsername(username)
