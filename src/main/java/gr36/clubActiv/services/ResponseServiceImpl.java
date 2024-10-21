@@ -40,4 +40,9 @@ public class ResponseServiceImpl implements ResponseService {
   public List<Response> getResponsesByReviewId(Long reviewId) {
     return responseRepository.findByReviewId(reviewId);
   }
+
+  @Override
+  public Response findResponseById(Long responseId) {
+    return responseRepository.findById(responseId).orElse(null);
+  }
 }

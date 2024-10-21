@@ -68,9 +68,10 @@ public class SecurityConfig {
             // Reviews and Responses
             .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
-//            .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/responses/review/{reviewId}").permitAll()
+            .requestMatchers(HttpMethod.DELETE, "/api/responses/{id}").hasAnyRole("ADMIN", "USER")
 
             // Authentication and registration routes
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
