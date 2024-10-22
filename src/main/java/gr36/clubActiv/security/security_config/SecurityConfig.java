@@ -40,7 +40,6 @@ public class SecurityConfig {
         .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(x -> x
 
-
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
@@ -60,33 +59,29 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/news/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/news/{id}").hasRole("ADMIN")
 
-            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}")
-            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user")
-            .hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities")
-            .hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user")
-            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
 
             //Reviews
             .requestMatchers(HttpMethod.POST, "/api/reviews").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/reviews").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/reviews/{id}").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/reviews/{id}").hasRole("USER")
+            .requestMatchers(HttpMethod.DELETE, "/api/reviews/{id}").hasAnyRole("ADMIN", "USER")
 
             //Responses
             .requestMatchers(HttpMethod.POST, "/api/review/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}")
-            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.POST, "/api/responses/review/{reviewId}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.GET, "/api/review").permitAll()
 
-            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}")
-            .hasAnyRole("ADMIN", "USER")
+
+            .requestMatchers(HttpMethod.PUT, "/api/activity/update/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user")
-            .hasAnyRole("ADMIN", "USER")
-            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities")
-            .hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.PUT, "/api/activity/{activity_id}/add-user").hasAnyRole("ADMIN", "USER")
+            .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user")
             .authenticated()
 

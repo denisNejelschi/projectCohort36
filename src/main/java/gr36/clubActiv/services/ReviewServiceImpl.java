@@ -33,16 +33,15 @@ public class ReviewServiceImpl implements ReviewService {
   public List<Review> getAllReviews() {
     return reviewRepository.findAll();
   }
-
   @Override
   public Optional<Review> findById(Long id) {
-    return reviewRepository.findById(id);
+    return reviewRepository.findById(id);  // Возвращаем Optional<Review>
   }
 
+
+
   @Override
-  public void update(Long id) {
-    Review review = reviewRepository.findById(id)
-        .orElseThrow(() -> new ReviewNotFounException("Review not found"));
-    reviewRepository.saveAndFlush(reviewRepository.findById(id).get());
+  public void update(Review review) {
+    reviewRepository.saveAndFlush(review);  // Сохраняем изменения
   }
 }

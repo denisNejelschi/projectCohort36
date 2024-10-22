@@ -1,5 +1,6 @@
 package gr36.clubActiv.services.interfaces;
 
+import gr36.clubActiv.domain.dto.NewsDto;
 import gr36.clubActiv.domain.entity.News;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface NewsService {
 
   Optional<News> findById(Long id);
 
-  News update(Long id, News newsDetails);
+  News update(Long id, NewsDto newsDto);
 
   void delete(Long id);
 }

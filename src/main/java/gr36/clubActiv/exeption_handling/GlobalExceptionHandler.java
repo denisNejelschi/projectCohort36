@@ -75,4 +75,10 @@ public class GlobalExceptionHandler {
     Response response = new Response(e.getMessage(), HttpStatus.BAD_REQUEST.value());
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
+  @ExceptionHandler(ReviewNotFounException.class)
+  public ResponseEntity<String> handleReviewNotFound(ReviewNotFounException e) {
+    log.error("ReviewNotFounException occurred: {}", e.getMessage(), e);
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
 }

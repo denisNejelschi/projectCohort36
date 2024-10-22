@@ -1,5 +1,6 @@
 package gr36.clubActiv.services;
 
+import gr36.clubActiv.domain.dto.NewsDto;
 import gr36.clubActiv.domain.entity.News;
 import gr36.clubActiv.repository.NewsRepository;
 import gr36.clubActiv.services.interfaces.NewsService;
@@ -33,14 +34,19 @@ public class NewsServiceImpl implements NewsService {
   }
 
   @Override
-  public News update(Long id, News newsDetails) {
-    News news = newsRepository.findById(id)
+  public News update(Long id, NewsDto newsDto) {
+    News existingNews = newsRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("News not found"));
+    if (newsDto.getTitle() != null) {
+      existingNews.setTitle(newsDto.getTitle());
+    }
+    if (newsDto.getDescription() != null) {
+      existingNews.setDescription(newsDto.getDescription());
+    }
 
-    news.setTitle(newsDetails.getTitle());
-    news.setDescription(newsDetails.getDescription());
-    return newsRepository.save(news);
+    return newsRepository.save(existingNews);
   }
+
 
   @Override
   public void delete(Long id) {
