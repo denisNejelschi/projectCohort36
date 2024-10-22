@@ -7,7 +7,7 @@ public class NewsDto {
     private String description;
     private String createdBy;
 
-    // Конструкторы
+
     public NewsDto() {}
 
     public NewsDto(String title, String description, String createdBy) {
@@ -16,7 +16,7 @@ public class NewsDto {
         this.createdBy = createdBy;
     }
 
-    // Геттеры и сеттеры
+
     public String getTitle() {
         return title;
     }

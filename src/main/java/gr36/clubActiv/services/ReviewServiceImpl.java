@@ -35,13 +35,13 @@ public class ReviewServiceImpl implements ReviewService {
   }
   @Override
   public Optional<Review> findById(Long id) {
-    return reviewRepository.findById(id);  // Возвращаем Optional<Review>
+    return reviewRepository.findById(id);
   }
 
 
 
   @Override
   public void update(Review review) {
-    reviewRepository.saveAndFlush(review);  // Сохраняем изменения
+    reviewRepository.saveAndFlush(review);
   }
 }

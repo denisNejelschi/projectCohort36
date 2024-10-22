@@ -77,24 +77,24 @@ public class ReviewController {
     Review existingReview = reviewService.findById(id)
             .orElseThrow(() -> new ReviewNotFounException("Review with ID " + id + " not found"));
 
-    // Проверяем, что текущий пользователь - создатель отзыва
+
     if (!existingReview.getCreatedBy().equals(username)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
               .body("You are not authorized to update this review.");
     }
 
-    // Обновляем только переданные поля
+
     if (updatedReview.getTitle() != null) {
       existingReview.setTitle(updatedReview.getTitle());
     }
     if (updatedReview.getDescription() != null) {
       existingReview.setDescription(updatedReview.getDescription());
     }
-    if (updatedReview.getRating() != 0) {  // Проверяем, чтобы рейтинг был больше 0
+    if (updatedReview.getRating() != 0) {
       existingReview.setRating(updatedReview.getRating());
     }
 
-    // Обновляем поле created_at автоматически
+
     existingReview.setCreatedAt(LocalDateTime.now());
 
     reviewService.update(existingReview);

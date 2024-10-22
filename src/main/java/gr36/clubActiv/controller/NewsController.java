@@ -44,7 +44,6 @@ public class NewsController {
   @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<News> updateNews(@PathVariable Long id, @RequestBody NewsDto newsDto) {
-    // Вызываем метод сервиса для обновления, передавая DTO
     News updatedNews = newsService.update(id, newsDto);
     return ResponseEntity.ok(updatedNews);
   }
