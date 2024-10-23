@@ -117,6 +117,7 @@ public class ActivityController {
   }
 
 
+
   @GetMapping("/my-activities")
   public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
     String username = authentication.getName();

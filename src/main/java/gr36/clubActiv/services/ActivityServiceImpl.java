@@ -134,14 +134,18 @@ public class ActivityServiceImpl implements ActivityService {
       throw new IllegalArgumentException("Автор активности не может добавлять себя в свою же активность.");
     }
 
-    // Если пользователь не автор и не состоит в активности, добавляем его
-    if (!activity.getUsers().contains(user)) {
-      activity.addUser(user);
-      repository.save(activity);
+    // Проверка на то, состоит ли пользователь уже в активности
+    if (activity.getUsers().contains(user)) {
+      throw new IllegalArgumentException("Пользователь уже зарегистрирован в этой активности.");
     }
+
+    // Если пользователь не автор и не состоит в активности, добавляем его
+    activity.addUser(user);
+    repository.save(activity);
 
     return mappingService.mapEntityToDto(activity);
   }
+
 
 
   @Override
