@@ -129,12 +129,20 @@ public class ActivityServiceImpl implements ActivityService {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new UserNotFoundException(username));
 
+    // Проверка на то, является ли пользователь автором активности
+    if (activity.getAuthor().getId().equals(user.getId())) {
+      throw new IllegalArgumentException("Автор активности не может добавлять себя в свою же активность.");
+    }
+
+    // Если пользователь не автор и не состоит в активности, добавляем его
     if (!activity.getUsers().contains(user)) {
       activity.addUser(user);
       repository.save(activity);
     }
+
     return mappingService.mapEntityToDto(activity);
   }
+
 
   @Override
   public List<ActivityDto> getActivitiesByUserId(Long userId) {
