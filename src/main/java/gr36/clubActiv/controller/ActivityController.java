@@ -106,15 +106,17 @@ public class ActivityController {
   }
 
   @PutMapping("/{activity_id}/add-user")
-
-  public ResponseEntity<ActivityDto> addUserToActivity(@PathVariable Long activity_id,
-      Authentication authentication) {
+  public ResponseEntity<?> addUserToActivity(@PathVariable Long activity_id, Authentication authentication) {
     String username = authentication.getName();
-    User user = userService.findByUsername(username)
-        .orElseThrow(() -> new UserNotFoundException("User not found"));
-    ActivityDto updatedActivity = service.addUserToActivity(activity_id, username);
-    return ResponseEntity.ok(updatedActivity);
+    try {
+      ActivityDto updatedActivity = service.addUserToActivity(activity_id, username);
+      return ResponseEntity.ok(updatedActivity);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
   }
+
+
 
   @GetMapping("/my-activities")
   public ResponseEntity<List<ActivityDto>> getMyActivities(Authentication authentication) {
