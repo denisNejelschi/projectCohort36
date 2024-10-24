@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,12 +36,14 @@ public class UserServiceImpl implements UserService {
   private final ConfirmationService confirmationService;
   private final ConfirmationCodeRepository confirmationCodeRepository;
   private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
 
   public UserServiceImpl(UserRepository repository, RoleService roleService,
       EmailService emailService, BCryptPasswordEncoder encoder,
       ConfirmationService confirmationService,
-      ConfirmationCodeRepository confirmationCodeRepository, UserRepository userRepository) {
+      ConfirmationCodeRepository confirmationCodeRepository, UserRepository userRepository,
+      PasswordEncoder passwordEncoder) {
     this.repository = repository;
     this.roleService = roleService;
     this.emailService = emailService;
@@ -48,6 +51,7 @@ public class UserServiceImpl implements UserService {
     this.confirmationService = confirmationService;
     this.confirmationCodeRepository = confirmationCodeRepository;
     this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
   }
 
   @Override
@@ -193,6 +197,16 @@ public class UserServiceImpl implements UserService {
   @Override
   public Optional<User> findByUsername(String username) {
     return userRepository.findByUsername(username);
+  }
+
+  @Override
+  public Optional<User> findByEmail(String email) {
+    return userRepository.findByEmail(email);
+  }
+  @Override
+  public void updatePassword(User user, String newPassword) {
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
   }
 
 
