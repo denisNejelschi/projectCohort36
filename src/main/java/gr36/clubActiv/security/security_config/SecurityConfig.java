@@ -40,6 +40,7 @@ public class SecurityConfig {
         .addFilterAfter(filter, UsernamePasswordAuthenticationFilter.class)
         .authorizeHttpRequests(x -> x
 
+            // Activity Endpoints
             .requestMatchers(HttpMethod.GET, "/api/activity").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/activity/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.POST, "/api/activity").hasAnyRole("ADMIN", "USER")
@@ -52,7 +53,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/activity/my-activities").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/activity/{activity_id}/remove-user").hasAnyRole("ADMIN", "USER")
 
-            // User management: allow ADMIN to update any user and regular users to update themselves
+            // User management
             .requestMatchers(HttpMethod.GET, "/api/users").hasRole("ADMIN")
             .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
             .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyRole("ADMIN", "USER")
@@ -73,12 +74,17 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/api/responses/review/{reviewId}").permitAll()
             .requestMatchers(HttpMethod.DELETE, "/api/responses/{id}").hasAnyRole("ADMIN", "USER")
 
-            // Authentication and registration routes
+            // Authentication and registration
             .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/refresh").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
             .requestMatchers(HttpMethod.DELETE, "/api/auth/logout").authenticated()
+
+            // Forgot password
+            .requestMatchers(HttpMethod.POST, "/api/forgot-password").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/validate-reset-token**").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/reset-password**").permitAll()
 
         ).build();
   }
